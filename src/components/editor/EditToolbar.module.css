@@ -1,0 +1,43 @@
+.editToolbar {
+  position: absolute;
+  top: -20px; /* Floating above the element */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--primary, #3d3d8f);
+  border-radius: 9999px;
+  padding: 4px 10px;
+  display: flex;
+  gap: 8px;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+  z-index: 100;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.iconBtn {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  transition: opacity 0.2s;
+}
+
+.iconBtn:hover {
+  opacity: 0.8;
+}
+
+/* Parent hover effect helper */
+:global(.editable-element) {
+  position: relative;
+}
+
+:global(.editable-element):hover > .editToolbar {
+  opacity: 1;
+  visibility: visible;
+}

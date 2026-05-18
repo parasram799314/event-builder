@@ -23,8 +23,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
-      <body>{children}</body>
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <link 
+          rel="stylesheet" 
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" 
+        />
+        <link 
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Montserrat:wght@400;700&family=Poppins:wght@400;700&family=Playfair+Display:wght@400;700&family=Open+Sans:wght@400;700&family=Lato:wght@400;700&family=Roboto:wght@400;700&family=Oswald:wght@400;700&family=Raleway:wght@400;700&family=Nunito:wght@400;700&family=Ubuntu:wght@400;700&family=Lora:wght@400;700&family=Merriweather:wght@400;700&family=PT+Serif:wght@400;700&family=Bebas+Neue&family=Dancing+Script&family=Pacifico&family=Caveat&family=Josefin+Sans:wght@400;700&family=Arimo:wght@400;700&family=Bitter:wght@400;700&family=Anton&family=Libre+Baskerville:wght@400;700&family=Fjalla+One&family=Quicksand:wght@400;700&family=Hind:wght@400;700&family=Titillium+Web:wght@400;700&family=Noto+Sans:wght@400;700&family=Rubik:wght@400;700&family=Source+Sans+Pro:wght@400;700&family=Karla:wght@400;700&family=Inconsolata&family=Crimson+Text:wght@400;700&family=Work+Sans:wght@400;700&family=Abel&family=Zilla+Slab:wght@400;700&family=Comfortaa:wght@400;700&family=Dosis:wght@400;700&family=Cabin:wght@400;700&family=Archivo:wght@400;700&family=Josefin+Slab:wght@400;700&family=Space+Grotesk:wght@400;700&family=Syne:wght@400;700&family=Outfit:wght@400;700&family=Manrope:wght@400;700&family=Lexend:wght@400;700&display=swap" 
+          rel="stylesheet"
+        />
+      </head>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        {children}
+      </body>
     </html>
   );
 }

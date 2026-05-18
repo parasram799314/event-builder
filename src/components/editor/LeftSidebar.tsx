@@ -1,0 +1,38 @@
+"use client";
+
+import React, { useState } from 'react';
+import styles from './LeftSidebar.module.css';
+
+const navItems = [
+  { id: 'themes', label: 'Themes', icon: '🎨' },
+  { id: 'visuals', label: 'Visuals', icon: '🌈' },
+  { id: 'pages', label: 'Pages', icon: '📄' },
+  { id: 'settings', label: 'Settings', icon: '⚙️' },
+];
+
+interface LeftSidebarProps {
+  activeTab: string;
+  onTabChange: (tab: string) => void;
+}
+
+const LeftSidebar: React.FC<LeftSidebarProps> = ({ activeTab, onTabChange }) => {
+  return (
+    <aside className={styles.sidebar}>
+      <nav className={styles.nav}>
+        {navItems.map((item) => (
+          <button
+            key={item.id}
+            className={`${styles.navItem} ${activeTab === item.id ? styles.active : ''}`}
+            onClick={() => onTabChange(item.id)}
+            title={item.label}
+          >
+            <span className={styles.icon}>{item.icon}</span>
+            <span className={styles.label}>{item.label}</span>
+          </button>
+        ))}
+      </nav>
+    </aside>
+  );
+};
+
+export default LeftSidebar;

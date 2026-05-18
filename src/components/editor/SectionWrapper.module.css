@@ -1,0 +1,134 @@
+.hiddenPlaceholder {
+  background-color: #f1f5f9;
+  color: #94a3b8;
+  padding: 40px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  font-style: italic;
+  width: 100%;
+  text-align: center;
+  border: 1px dashed #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.container {
+  position: relative;
+  width: 100%;
+  transition: all 0.2s;
+  border: 2px dashed transparent;
+}
+
+.active {
+  border-color: #3b82f6;
+  z-index: 50;
+}
+
+.content {
+  width: 100%;
+}
+
+.toolbar {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  display: flex;
+  overflow: hidden;
+  z-index: 60;
+  border: 1px solid #e2e8f0;
+}
+
+.toolBtn {
+  background: none;
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+  color: #64748b;
+  font-size: 14px;
+  transition: all 0.2s;
+  border-right: 1px solid #f1f5f9;
+}
+
+.toolBtn:last-child {
+  border-right: none;
+}
+
+.toolBtn:hover {
+  background-color: #f8fafc;
+  color: #3b82f6;
+}
+
+.toolBtn.delete:hover {
+  color: #ef4444;
+  background-color: #fef2f2;
+}
+
+.toolBtn.disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.addSectionContainer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 55;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.addSectionContainer.top {
+  top: -12px;
+}
+
+.addSectionContainer.bottom {
+  bottom: -12px;
+}
+
+.container:hover .addSectionContainer {
+  opacity: 1;
+}
+
+.addSectionBtn {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transform: scale(0.9);
+  transition: transform 0.2s;
+}
+
+.addSectionBtn:hover {
+  background-color: #2563eb;
+  transform: scale(1);
+}
+
+.showBtn {
+  margin-left: 16px;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.showBtn:hover {
+  background-color: #2563eb;
+}
