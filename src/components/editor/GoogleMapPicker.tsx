@@ -42,7 +42,7 @@ const GoogleMapPicker: React.FC<GoogleMapPickerProps> = ({ address, onLocationSe
     setMap(null);
   }, []);
 
-  const onPlaceChanged = () => {
+  const onPlaceChanged = useCallback(() => {
     if (autocomplete !== null) {
       const place = autocomplete.getPlace();
       if (place.geometry && place.geometry.location) {
@@ -61,16 +61,15 @@ const GoogleMapPicker: React.FC<GoogleMapPickerProps> = ({ address, onLocationSe
         onLocationSelect(place.formatted_address || '', lat, lng, imageUrl);
       }
     }
-  };
+  }, [autocomplete, map, onLocationSelect]);
 
-  const onMapClick = (e: google.maps.MapMouseEvent) => {
+  const onMapClick = useCallback((e: google.maps.MapMouseEvent) => {
     if (e.latLng) {
       const lat = e.latLng.lat();
       const lng = e.latLng.lng();
       const newPos = { lat, lng };
       setMarkerPosition(newPos);
       
-      // Use geocoder to get address from lat/lng
       const geocoder = new google.maps.Geocoder();
       geocoder.geocode({ location: newPos }, (results, status) => {
         if (status === 'OK' && results?.[0]) {
@@ -78,7 +77,7 @@ const GoogleMapPicker: React.FC<GoogleMapPickerProps> = ({ address, onLocationSe
         }
       });
     }
-  };
+  }, [onLocationSelect]);
 
   useEffect(() => {
     if (isLoaded && address && !markerPosition) {

@@ -37,7 +37,24 @@
   position: relative;
 }
 
-:global(.editable-element):hover > .editToolbar {
+:global(.editable-element):hover > .editToolbar,
+:global(.editable-element):focus-within > .editToolbar,
+:global(.editable-element.active) > .editToolbar {
   opacity: 1;
   visibility: visible;
+}
+
+@media (max-width: 768px) {
+  .editToolbar {
+    opacity: 1;
+    visibility: visible;
+    top: -30px;
+    background-color: #0f172a;
+    padding: 6px 12px;
+  }
+  
+  .iconBtn {
+    font-size: 14px;
+    padding: 4px;
+  }
 }

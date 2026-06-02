@@ -24,7 +24,8 @@ const GlobalSettingsPanel: React.FC<GlobalSettingsPanelProps> = ({
   onAddProfile,
   onUpdateProfile,
   onUpdateSection, 
-  onClose 
+  onClose,
+  onSave
 }) => {
   const [view, setView] = useState<'DASHBOARD' | 'EDIT_PROFILE'>('DASHBOARD');
   const [editingProfileId, setEditingProfileId] = useState<string | null>(null);

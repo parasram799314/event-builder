@@ -24,6 +24,7 @@ const CATEGORIES: Category[] = [
   { id: 'SPONSORS', label: 'Sponsors', icon: 'fa-handshake' },
   { id: 'SESSIONS', label: 'Featured Sessions', icon: 'fa-calendar-check' },
   { id: 'SCHEDULE', label: 'Schedule', icon: 'fa-calendar-alt' },
+  { id: 'VENUE', label: 'Venue & Location', icon: 'fa-map-location-dot' },
   { id: 'MOVING_LINE', label: 'Moving Line (Ticker)', icon: 'fa-arrows-left-right' },
   { id: 'CONTACT', label: 'Contact Form', icon: 'fa-envelope' },
 ];

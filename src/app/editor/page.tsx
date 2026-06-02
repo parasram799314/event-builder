@@ -36,16 +36,33 @@ import ThemesPanel, { ThemePreset } from "@/components/editor/ThemesPanel";
 import PagesPanel from "@/components/editor/PagesPanel";
 import ThemeOne from "@/components/editor/ThemeOne";
 import ThemeTwo from "@/components/editor/ThemeTwo";
+import ThemeThree from "@/components/editor/ThemeThree";
 import GlobalSettingsPanel from "@/components/editor/GlobalSettingsPanel";
 import AddSectionModal from "@/components/editor/AddSectionModal";
 
-export default function NavratriEditor() {
+import { Suspense } from "react";
+
+function NavratriEditorContent() {
   const [activeTab, setActiveTab] = useState("HOME");
   const [isLibraryOpen, setIsLibraryOpen] = useState(false);
   const [addIndex, setAddIndex] = useState<number | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [sidebarTab, setSidebarTab] = useState("themes");
+  const [sidebarTab, setSidebarTab] = useState("none");
   const [activeLayout, setActiveLayout] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'desktop' | 'mobile'>('desktop');
+  const [showMobileFrame, setShowMobileFrame] = useState(true);
+
+  // Detect real mobile screen
+  useEffect(() => {
+    const checkMobile = () => {
+      if (window.innerWidth <= 768) {
+        setViewMode('mobile');
+      }
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
   
   // ─── Multi-Profile State (Pages) ──────────────────────────────────────────
   const [eventProfiles, setEventProfiles] = useState<any[]>([
@@ -182,12 +199,12 @@ export default function NavratriEditor() {
   };
 
   const [themeConfig, setThemeConfig] = useState<any>({
-    primaryColor: '#FFC107',
+    primaryColor: '#F59E0B', // Professional Golden Amber
     backgroundColor: '#ffffff',
     textColor: '#1e293b',
     navbarColor: '#ffffff',
     navbarTextColor: '#1e293b',
-    activeLayout: null
+    activeLayout: 'theme1'
   });
 
   const router = useRouter();
@@ -205,6 +222,8 @@ export default function NavratriEditor() {
     };
     setThemeConfig(newConfig);
     setActiveLayout(newConfig.activeLayout);
+    // Automatically close the panel after selection
+    setSidebarTab("none");
   };
 
   useEffect(() => {
@@ -231,8 +250,8 @@ export default function NavratriEditor() {
           if (defaultProfile) setActiveProfileId(defaultProfile.id);
         } else if (current.content && current.content.sections) {
           // Legacy support
-          setEventProfiles([{ id: 'default', name: 'Main Configuration', isDefault: true, sections: current.content.sections }]);
-          setActiveProfileId('default');
+          setEventProfiles([{ id: 'home', name: 'Home', isDefault: true, sections: current.content.sections }]);
+          setActiveProfileId('home');
         }
 
         if (current.content && current.content.themeConfig) {
@@ -436,6 +455,13 @@ export default function NavratriEditor() {
         break;
       case 'MOVING_LINE':
         defaultData = { text: 'LATEST NEWS • UPCOMING SESSIONS • GLOBAL SUMMIT 2026 • REGISTER NOW • INNOVATE THE FUTURE • ', speed: 30, direction: 'left', fontSize: '24px' };
+        break;
+      case 'VENUE':
+        defaultData = { 
+          name: 'Innovation Hub', 
+          address: '456 Tech Plaza, San Francisco, CA', 
+          description: 'A world-class facility equipped with state-of-the-art technology and premium amenities for a superior event experience.' 
+        };
         break;
       case 'CONTACT':
         defaultData = { title: 'Connect With Us', subtitle: 'Our team is ready to assist you with any questions.' };
@@ -715,24 +741,65 @@ export default function NavratriEditor() {
               />
               <span className={styles.draftBadge}>DRAFT</span>
             </div>
-            <div className={styles.dateTime}>
-              {sections.find((s: any) => s.type === 'HERO')?.data?.dateTimeSettings?.eventDate 
-                ? new Date(sections.find((s: any) => s.type === 'HERO')?.data?.dateTimeSettings?.eventDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })
-                : 'Oct 15, 2026 • 06:00 PM IST'}
-            </div>
           </div>
         </div>
-        <div className={styles.topBarRight}>
-          <button className={styles.saveBtn} onClick={handleSave} disabled={isSaving}>
-            {isSaving ? "Saving..." : "Save"}
+
+        <div className={styles.deviceToggle}>
+          <button 
+            className={`${styles.deviceBtn} ${viewMode === 'desktop' ? styles.activeDevice : ''}`}
+            onClick={() => setViewMode('desktop')}
+            title="Desktop View"
+          >
+            <i className="fa-solid fa-desktop"></i>
           </button>
-          <button className={styles.previewBtn} onClick={() => window.open(`/preview/${websiteId || 'temp'}`, '_blank')}>Preview</button>
+          <button 
+            className={`${styles.deviceBtn} ${viewMode === 'mobile' ? styles.activeDevice : ''}`}
+            onClick={() => setViewMode('mobile')}
+            title="Mobile View"
+          >
+            <i className="fa-solid fa-mobile-screen-button"></i>
+          </button>
+        </div>
+
+        <div className={styles.topBarRight}>
+          {viewMode === 'mobile' && (
+            <button 
+              className={`${styles.frameToggleBtn} ${!showMobileFrame ? styles.activeFrameToggle : ''}`}
+              onClick={() => setShowMobileFrame(!showMobileFrame)}
+              title={showMobileFrame ? "Hide Mobile Frame" : "Show Mobile Frame"}
+            >
+              <i className={`fa-solid ${showMobileFrame ? 'fa-border-none' : 'fa-mobile-screen'}`}></i>
+              <span className={styles.btnText}>
+                {showMobileFrame ? 'NO FRAME' : 'FRAME'}
+              </span>
+            </button>
+          )}
+          <button className={styles.saveBtn} onClick={handleSave} disabled={isSaving} title="Save">
+            <i className="fa-solid fa-floppy-disk"></i>
+            <span className={styles.btnText}>{isSaving ? "Saving..." : "Save"}</span>
+          </button>
+          <button 
+            className={styles.previewBtn} 
+            title="Preview"
+            onClick={() => {
+              if (!websiteId) {
+                alert("Please save your website first to view the preview.");
+                return;
+              }
+              window.open(`/preview/${websiteId}`, '_blank');
+            }}
+          >
+            <i className="fa-solid fa-eye"></i>
+            <span className={styles.btnText}>Preview</span>
+          </button>
           <button 
             className={styles.publishBtn} 
             onClick={handlePublish} 
             disabled={isPublishing}
+            title="Publish"
           >
-            {isPublishing ? "Publishing..." : "Publish"}
+            <i className="fa-solid fa-rocket"></i>
+            <span className={styles.btnText}>{isPublishing ? "Publishing..." : "Publish"}</span>
           </button>
         </div>
       </header>
@@ -743,144 +810,278 @@ export default function NavratriEditor() {
         <LeftSidebar activeTab={sidebarTab} onTabChange={setSidebarTab} />
 
         {sidebarTab === 'settings' ? (
-          <GlobalSettingsPanel 
-            profiles={eventProfiles}
-            activeProfileId={activeProfileId}
-            onSelectProfile={setActiveProfileId}
-            onAddProfile={(newProfile) => setEventProfiles([...eventProfiles, newProfile])}
-            onUpdateProfile={(id, newData) => setEventProfiles(eventProfiles.map(p => p.id === id ? { ...p, ...newData } : p))}
-            onUpdateSection={updateSectionData}
-            onClose={() => setSidebarTab('none')} 
-            onSave={handleSave}
-          />
+          <div className={styles.mobilePanelOverlay}>
+            <GlobalSettingsPanel 
+              profiles={eventProfiles}
+              activeProfileId={activeProfileId}
+              onSelectProfile={setActiveProfileId}
+              onAddProfile={(newProfile) => setEventProfiles([...eventProfiles, newProfile])}
+              onUpdateProfile={(id, newData) => setEventProfiles(eventProfiles.map(p => p.id === id ? { ...p, ...newData } : p))}
+              onUpdateSection={updateSectionData}
+              onClose={() => setSidebarTab('none')} 
+              onSave={handleSave}
+            />
+          </div>
         ) : (
-          <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+          <div className={styles.contentWrapper} style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
             {sidebarTab === 'themes' && (
-              <ThemesPanel 
-                onSelectTheme={handleSelectTheme} 
-                onClose={() => setSidebarTab('none')} 
-              />
+              <div className={viewMode === 'mobile' ? styles.bottomThemesBar : styles.mobilePanelOverlay}>
+                <ThemesPanel 
+                  variant={viewMode === 'mobile' ? 'horizontal' : 'sidebar'}
+                  onSelectTheme={handleSelectTheme} 
+                  onClose={() => setSidebarTab('none')} 
+                />
+              </div>
             )}
 
             {sidebarTab === 'visuals' && (
-              <VisualsPanel 
-                themeConfig={themeConfig} 
-                updateThemeConfig={setThemeConfig} 
-                onClose={() => setSidebarTab('none')} 
-              />
+              <div className={viewMode === 'mobile' ? styles.bottomPanelOverlay : styles.mobilePanelOverlay} onClick={() => viewMode === 'mobile' && setSidebarTab('none')}>
+                <div className={viewMode === 'mobile' ? styles.bottomPanelContent : ''} onClick={e => e.stopPropagation()}>
+                  <VisualsPanel 
+                    variant={viewMode === 'mobile' ? 'bottom' : 'sidebar'}
+                    themeConfig={themeConfig} 
+                    updateThemeConfig={setThemeConfig} 
+                    onClose={() => setSidebarTab('none')} 
+                  />
+                </div>
+              </div>
             )}
 
             {sidebarTab === 'pages' && (
-              <PagesPanel 
-                profiles={eventProfiles}
-                activeProfileId={activeProfileId}
-                onSelectProfile={(id) => {
-                  setActiveProfileId(id);
-                  const profile = eventProfiles.find(p => p.id === id);
-                  if (profile) setActiveTab(profile.name.toUpperCase());
-                }}
-                onAddProfile={(newProfile) => setEventProfiles([...eventProfiles, newProfile])}
-                onDeleteProfile={deleteProfile}
-                onUpdateProfile={(id, newData) => setEventProfiles(eventProfiles.map(p => p.id === id ? { ...p, ...newData } : p))}
-                onClose={() => setSidebarTab('none')} 
-              />
+              <div className={viewMode === 'mobile' ? styles.bottomPanelOverlay : styles.mobilePanelOverlay} onClick={() => viewMode === 'mobile' && setSidebarTab('none')}>
+                <div className={viewMode === 'mobile' ? styles.bottomPanelContent : ''} onClick={e => e.stopPropagation()}>
+                  <PagesPanel 
+                    variant={viewMode === 'mobile' ? 'bottom' : 'sidebar'}
+                    profiles={eventProfiles}
+                    activeProfileId={activeProfileId}
+                    onSelectProfile={(id) => {
+                      setActiveProfileId(id);
+                      const profile = eventProfiles.find(p => p.id === id);
+                      if (profile) setActiveTab(profile.name.toUpperCase());
+                    }}
+                    onAddProfile={(newProfile) => setEventProfiles([...eventProfiles, newProfile])}
+                    onDeleteProfile={deleteProfile}
+                    onUpdateProfile={(id, newData) => setEventProfiles(eventProfiles.map(p => p.id === id ? { ...p, ...newData } : p))}
+                    onClose={() => setSidebarTab('none')} 
+                  />
+                </div>
+              </div>
             )}
 
             <div className={styles.canvasArea} style={{ 
               backgroundColor: themeConfig.backgroundColor,
               flex: 1,
-              overflowY: 'auto'
+              overflowY: (viewMode === 'mobile' && showMobileFrame) ? 'hidden' : 'auto'
             }}>
-              {activeLayout === 'theme-one' ? (
-                <div className={styles.layoutCanvas}>
-                  <ThemeOne 
-                    data={{ sections }} 
-                    themeConfig={themeConfig} 
-                    isReadOnly={false} 
-                    onUpdateSection={updateSectionData}
-                    profiles={eventProfiles}
-                    footerData={footerData}
-                    onUpdateFooter={setFooterData}
-                    onMoveUp={(index) => moveSection(index, 'up')}
-                    onMoveDown={(index) => moveSection(index, 'down')}
-                    onDelete={(index) => deleteSection(sections[index].id)}
-                    onAddClick={(index) => { setAddIndex(index); setIsLibraryOpen(true); }}
-                    onTabChange={handleNavbarTabChange}
-                  />
-                </div>
-              ) : activeLayout === 'theme-two' ? (
-                <div className={styles.layoutCanvas}>
-                  <ThemeTwo 
-                    data={{ sections }} 
-                    themeConfig={themeConfig} 
-                    isReadOnly={false} 
-                    onUpdateSection={updateSectionData}
-                    profiles={eventProfiles}
-                    footerData={footerData}
-                    onUpdateFooter={setFooterData}
-                    onMoveUp={(index) => moveSection(index, 'up')}
-                    onMoveDown={(index) => moveSection(index, 'down')}
-                    onDelete={(index) => deleteSection(sections[index].id)}
-                    onAddClick={(index) => { setAddIndex(index); setIsLibraryOpen(true); }}
-                    onTabChange={handleNavbarTabChange}
-                  />
-                </div>
-              ) : (
-
-                <>
-                  {/* Event Website Navbar Component */}
-                  <EventNavbar 
-                    activeTab={activeTab} 
-                    onTabChange={handleNavbarTabChange} 
-                    links={eventProfiles.filter(p => p.isVisible !== false).map(p => p.name.toUpperCase())}
-                    themeConfig={themeConfig}
-                  />
-
-                  {/* Editor Canvas */}
-                  <main className={styles.canvas}>
-                    {sections.length === 0 ? (
-                      <div 
-                        style={{ 
-                          height: '400px', display: 'flex', flexDirection: 'column', 
-                          alignItems: 'center', justifyContent: 'center', gap: '20px',
-                          background: '#f8fafc', border: '2px dashed #e2e8f0', margin: '40px',
-                          borderRadius: '24px'
-                        }}
-                      >
-                         <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px', color: '#2563eb' }}>
-                            <i className="fa-solid fa-plus-circle"></i>
-                         </div>
-                         <div style={{ textAlign: 'center' }}>
-                            <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#0f172a' }}>Start building your page</h3>
-                            <p style={{ color: '#64748b', marginTop: '4px' }}>Add sections to create beautiful content between navbar and footer.</p>
-                         </div>
-                         <button 
-                           onClick={() => openLibrary(null)}
-                           style={{ background: '#2563eb', color: '#fff', border: 'none', padding: '12px 30px', borderRadius: '12px', fontWeight: '700', cursor: 'pointer' }}
-                         >
-                           + Add Section
-                         </button>
+              {viewMode === 'mobile' ? (
+                <div className={`${styles.mobilePreviewContainer} ${!showMobileFrame ? styles.noFrame : ''} is-mobile-preview`}>
+                  {showMobileFrame && (
+                    <>
+                      {/* Physical Side Buttons */}
+                      <div className={`${styles.sideButton} ${styles.volumeUp}`}></div>
+                      <div className={`${styles.sideButton} ${styles.volumeDown}`}></div>
+                      <div className={`${styles.sideButton} ${styles.powerBtn}`}></div>
+                      
+                      {/* Notch / Dynamic Island */}
+                      <div className={styles.dynamicIsland}></div>
+                      
+                      {/* Status Bar */}
+                      <div className={styles.statusBar}>
+                        <span>9:41</span>
+                        <div className={styles.statusIcons}>
+                          <i className="fa-solid fa-signal"></i>
+                          <i className="fa-solid fa-wifi"></i>
+                          <i className="fa-solid fa-battery-full"></i>
+                        </div>
                       </div>
+                    </>
+                  )}
+
+                  <div className={`${styles.mobilePreviewContent} ${!showMobileFrame ? styles.noFrameContent : ''}`}>
+                    {activeLayout === 'theme-one' ? (
+                      <ThemeOne 
+                        data={{ sections }} 
+                        themeConfig={themeConfig} 
+                        isReadOnly={false} 
+                        onUpdateSection={updateSectionData}
+                        profiles={eventProfiles}
+                        footerData={footerData}
+                        onUpdateFooter={setFooterData}
+                        onMoveUp={(index) => moveSection(index, 'up')}
+                        onMoveDown={(index) => moveSection(index, 'down')}
+                        onDelete={(index) => deleteSection(sections[index].id)}
+                        onAddClick={(index) => { setAddIndex(index); setIsLibraryOpen(true); }}
+                        onTabChange={handleNavbarTabChange}
+                        forceMobile={viewMode === 'mobile'}
+                      />
+                    ) : activeLayout === 'theme-two' ? (
+                      <ThemeTwo 
+                        data={{ sections }} 
+                        themeConfig={themeConfig} 
+                        isReadOnly={false} 
+                        onUpdateSection={updateSectionData}
+                        profiles={eventProfiles}
+                        footerData={footerData}
+                        onUpdateFooter={setFooterData}
+                        onMoveUp={(index) => moveSection(index, 'up')}
+                        onMoveDown={(index) => moveSection(index, 'down')}
+                        onDelete={(index) => deleteSection(sections[index].id)}
+                        onAddClick={(index) => { setAddIndex(index); setIsLibraryOpen(true); }}
+                        onTabChange={handleNavbarTabChange}
+                        forceMobile={viewMode === 'mobile'}
+                      />
                     ) : (
                       <>
-                        {sections.map((section: any, index: number) => renderSection(section, index))}
-                        {/* Footer Component */}
-                        <Footer 
-                          profiles={eventProfiles} 
-                          data={footerData} 
-                          updateData={setFooterData} 
-                          isReadOnly={false} 
+                        {/* Event Website Navbar Component */}
+                        <EventNavbar 
+                          activeTab={activeTab} 
+                          onTabChange={handleNavbarTabChange} 
+                          links={eventProfiles.filter(p => p.isVisible !== false).map(p => p.name.toUpperCase())}
                           themeConfig={themeConfig}
                         />
+
+                        {/* Editor Canvas */}
+                        <main className={styles.canvas}>
+                          {sections.length === 0 ? (
+                            <div 
+                              style={{ 
+                                height: '400px', display: 'flex', flexDirection: 'column', 
+                                alignItems: 'center', justifyContent: 'center', gap: '20px',
+                                background: '#f8fafc', border: '2px dashed #e2e8f0', margin: '40px',
+                                borderRadius: '24px'
+                              }}
+                            >
+                              <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px', color: '#2563eb' }}>
+                                  <i className="fa-solid fa-plus-circle"></i>
+                              </div>
+                              <div style={{ textAlign: 'center' }}>
+                                  <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#0f172a' }}>Start building your page</h3>
+                                  <p style={{ color: '#64748b', marginTop: '4px' }}>Add sections to create beautiful content between navbar and footer.</p>
+                              </div>
+                              <button 
+                                onClick={() => openLibrary(null)}
+                                style={{ background: '#2563eb', color: '#fff', border: 'none', padding: '12px 30px', borderRadius: '12px', fontWeight: '700', cursor: 'pointer' }}
+                              >
+                                + Add Section
+                              </button>
+                            </div>
+                          ) : (
+                            <>
+                              {sections.map((section: any, index: number) => renderSection(section, index))}
+                              {/* Footer Component */}
+                              <Footer 
+                                profiles={eventProfiles} 
+                                data={footerData} 
+                                updateData={setFooterData} 
+                                isReadOnly={false} 
+                                themeConfig={themeConfig}
+                              />
+                            </>
+                          )}
+                        </main>
                       </>
                     )}
-                  </main>
-                </>
+                  </div>
+
+                  {showMobileFrame && <div className={styles.homeIndicator}></div>}
+                </div>
+              ) : (
+                <div className={styles.layoutCanvas}>
+                  {activeLayout === 'theme-one' ? (
+                    <ThemeOne 
+                      data={{ sections }} 
+                      themeConfig={themeConfig} 
+                      isReadOnly={false} 
+                      onUpdateSection={updateSectionData}
+                      profiles={eventProfiles}
+                      footerData={footerData}
+                      onUpdateFooter={setFooterData}
+                      onMoveUp={(index) => moveSection(index, 'up')}
+                      onMoveDown={(index) => moveSection(index, 'down')}
+                      onDelete={(index) => deleteSection(sections[index].id)}
+                      onAddClick={(index) => { setAddIndex(index); setIsLibraryOpen(true); }}
+                      onTabChange={handleNavbarTabChange}
+                    />
+                  ) : activeLayout === 'theme-two' ? (
+                    <ThemeTwo 
+                      data={{ sections }} 
+                      themeConfig={themeConfig} 
+                      isReadOnly={false} 
+                      onUpdateSection={updateSectionData}
+                      profiles={eventProfiles}
+                      footerData={footerData}
+                      onUpdateFooter={setFooterData}
+                      onMoveUp={(index) => moveSection(index, 'up')}
+                      onMoveDown={(index) => moveSection(index, 'down')}
+                      onDelete={(index) => deleteSection(sections[index].id)}
+                      onAddClick={(index) => { setAddIndex(index); setIsLibraryOpen(true); }}
+                      onTabChange={handleNavbarTabChange}
+                    />
+                  ) : (
+                    <>
+                      {/* Event Website Navbar Component */}
+                      <EventNavbar 
+                        activeTab={activeTab} 
+                        onTabChange={handleNavbarTabChange} 
+                        links={eventProfiles.filter(p => p.isVisible !== false).map(p => p.name.toUpperCase())}
+                        themeConfig={themeConfig}
+                      />
+
+                      {/* Editor Canvas */}
+                      <main className={styles.canvas}>
+                        {sections.length === 0 ? (
+                          <div 
+                            style={{ 
+                              height: '400px', display: 'flex', flexDirection: 'column', 
+                              alignItems: 'center', justifyContent: 'center', gap: '20px',
+                              background: '#f8fafc', border: '2px dashed #e2e8f0', margin: '40px',
+                              borderRadius: '24px'
+                            }}
+                          >
+                            <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px', color: '#2563eb' }}>
+                                <i className="fa-solid fa-plus-circle"></i>
+                            </div>
+                            <div style={{ textAlign: 'center' }}>
+                                <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#0f172a' }}>Start building your page</h3>
+                                <p style={{ color: '#64748b', marginTop: '4px' }}>Add sections to create beautiful content between navbar and footer.</p>
+                            </div>
+                            <button 
+                              onClick={() => openLibrary(null)}
+                              style={{ background: '#2563eb', color: '#fff', border: 'none', padding: '12px 30px', borderRadius: '12px', fontWeight: '700', cursor: 'pointer' }}
+                            >
+                              + Add Section
+                            </button>
+                          </div>
+                        ) : (
+                          <>
+                            {sections.map((section: any, index: number) => renderSection(section, index))}
+                            {/* Footer Component */}
+                            <Footer 
+                              profiles={eventProfiles} 
+                              data={footerData} 
+                              updateData={setFooterData} 
+                              isReadOnly={false} 
+                              themeConfig={themeConfig}
+                            />
+                          </>
+                        )}
+                      </main>
+                    </>
+                  )}
+                </div>
               )}
             </div>
           </div>
         )}
       </div>
     </div>
+  );
+}
+
+export default function NavratriEditor() {
+  return (
+    <Suspense fallback={<div>Loading Editor...</div>}>
+      <NavratriEditorContent />
+    </Suspense>
   );
 }

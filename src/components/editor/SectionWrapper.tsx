@@ -55,13 +55,13 @@ const SectionWrapper: React.FC<SectionWrapperProps> = ({
     const link = data.buttonLink || '#';
 
     return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: alignment === 'center' ? 'center' : (alignment === 'right' ? 'flex-end' : 'flex-start'),
-        padding: '40px 60px',
-        width: '100%',
-        fontFamily: fontFamily
-      }}>
+      <div 
+        className={styles.sectionButtonContainer}
+        style={{ 
+          justifyContent: alignment === 'center' ? 'center' : (alignment === 'right' ? 'flex-end' : 'flex-start'),
+          fontFamily: fontFamily
+        }}
+      >
         <button 
           onClick={() => !isReadOnly && link !== '#' && window.open(link, '_blank')}
           style={{ 
@@ -92,7 +92,7 @@ const SectionWrapper: React.FC<SectionWrapperProps> = ({
     );
   };
 
-  const verticalPadding = data?.verticalPadding !== undefined ? data.verticalPadding : 100;
+  const verticalPadding = data?.verticalPadding !== undefined ? data.verticalPadding : 0;
 
   // Calculate scale factor for internal elements (100 is normal, 0 is compact)
   // We clamp it so it doesn't get too tiny
@@ -100,20 +100,24 @@ const SectionWrapper: React.FC<SectionWrapperProps> = ({
 
   const getDynamicStyles = () => {
     return {
-      '--section-v-padding': `${Math.max(0, verticalPadding)}px`,
+      '--section-v-padding': `0px`,
       '--content-scale': scaleFactor,
       '--dynamic-gap': `${Math.max(4, 32 * scaleFactor)}px`,
       '--dynamic-item-padding': `${Math.max(8, 40 * scaleFactor)}px`,
       '--dynamic-title-size': `${Math.max(18, 42 * scaleFactor)}px`,
-      paddingTop: `${Math.max(0, verticalPadding)}px`, 
-      paddingBottom: `${Math.max(0, verticalPadding)}px`
+      paddingTop: `0px`, 
+      paddingBottom: `0px`
     };
   };
 
   if (isReadOnly) {
     if (!isVisible) return null;
     return (
-      <div className={styles.container} style={{ fontFamily: fontFamily }}>
+      <div 
+        id={id?.toLowerCase().replace(/\s+/g, '-')} 
+        className={styles.container} 
+        style={{ fontFamily: fontFamily }}
+      >
         <div className={styles.content} style={getDynamicStyles()}>
           {children}
           {renderSectionButton()}
@@ -124,6 +128,7 @@ const SectionWrapper: React.FC<SectionWrapperProps> = ({
 
   return (
     <div 
+      id={id?.toLowerCase().replace(/\s+/g, '-')}
       className={`${styles.container} ${isSelected || isHovered ? styles.active : ''} editable-element`}
       style={{ 
         fontFamily: fontFamily,

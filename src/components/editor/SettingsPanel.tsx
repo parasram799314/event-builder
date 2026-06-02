@@ -857,7 +857,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
   const panelContent = (
     <>
       <div className={`${styles.overlay} ${isOpen ? styles.overlayVisible : ''}`} onClick={onClose} />
-      <div className={`${styles.panel} ${isOpen ? styles.open : ''}`}>
+      <div className={`${styles.panel} ${styles.panelFixed} ${isOpen ? styles.open : ''}`}>
         <div className={styles.header}>
           <h3>{mode} SETTINGS</h3>
           <button className={styles.closeBtn} onClick={onClose}><i className="fas fa-times"></i></button>

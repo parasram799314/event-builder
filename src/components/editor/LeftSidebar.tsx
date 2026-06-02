@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState } from 'react';
+import React from 'react';
 import styles from './LeftSidebar.module.css';
 
 const navItems = [
-  { id: 'themes', label: 'Themes', icon: '🎨' },
-  { id: 'visuals', label: 'Visuals', icon: '🌈' },
-  { id: 'pages', label: 'Pages', icon: '📄' },
-  { id: 'settings', label: 'Settings', icon: '⚙️' },
+  { id: 'themes', label: 'Themes', icon: 'fa-solid fa-palette' },
+  { id: 'visuals', label: 'Visuals', icon: 'fa-solid fa-wand-magic-sparkles' },
+  { id: 'pages', label: 'Pages', icon: 'fa-solid fa-file-lines' },
+  { id: 'settings', label: 'Settings', icon: 'fa-solid fa-gear' },
 ];
 
 interface LeftSidebarProps {
@@ -26,7 +26,9 @@ const LeftSidebar: React.FC<LeftSidebarProps> = ({ activeTab, onTabChange }) => 
             onClick={() => onTabChange(item.id)}
             title={item.label}
           >
-            <span className={styles.icon}>{item.icon}</span>
+            <span className={styles.icon}>
+              <i className={item.icon}></i>
+            </span>
             <span className={styles.label}>{item.label}</span>
           </button>
         ))}

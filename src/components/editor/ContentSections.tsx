@@ -114,8 +114,8 @@ export const MediaTextSection: React.FC<ContentSectionProps> = (props) => {
       {!props.isReadOnly && (
         <SettingsPanel isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} mode="MEDIA_TEXT" data={sectionData} updateData={props.updateData!} />
       )}
-      <div className={styles.sectionContainer} style={{ paddingLeft: '60px', paddingRight: '60px', '--primary': props.themeConfig?.primaryColor || '#ff5722' } as any}>
-        <div style={{ display: 'flex', flexDirection: (sectionData.layout === 'right' ? 'row-reverse' : 'row') as any, alignItems: 'center', gap: '60px', textAlign: 'left' }}>
+      <div className={`${styles.sectionContainer} ${styles.responsivePadding}`} style={{ '--primary': props.themeConfig?.primaryColor || '#ff5722' } as any}>
+        <div className={styles.flexResponsive} style={{ flexDirection: (sectionData.layout === 'right' ? 'row-reverse' : 'row') as any, textAlign: 'left' }}>
           <div style={{ flex: 1 }} className="editable-element">
              {!props.isReadOnly && <EditToolbar onSettingsClick={() => setIsSidebarOpen(true)} />}
              <img src={sectionData.image} style={{ width: '100%', borderRadius: '24px', boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }} alt="Media" />
@@ -176,9 +176,9 @@ export const MediaGroupSection: React.FC<ContentSectionProps> = (props) => {
       {!props.isReadOnly && (
         <SettingsPanel isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} mode="MEDIA_GROUP" data={sectionData} updateData={props.updateData!} />
       )}
-      <div className={`${styles.sectionContainer} editable-element`} style={{ paddingLeft: '60px', paddingRight: '60px', '--primary': props.themeConfig?.primaryColor || '#ff5722' } as any}>
+      <div className={`${styles.sectionContainer} ${styles.responsivePadding} editable-element`} style={{ '--primary': props.themeConfig?.primaryColor || '#ff5722' } as any}>
         {!props.isReadOnly && <EditToolbar onSettingsClick={() => setIsSidebarOpen(true)} />}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '30px', width: '100%' }}>
+        <div className={styles.responsiveGrid}>
            {sectionData.items.map((item: any, i: number) => (
              <div key={i} className={styles.mediaGroupItem}>
                 {!props.isReadOnly && (
@@ -250,11 +250,11 @@ export const NumberCounterSection: React.FC<ContentSectionProps> = (props) => {
       {!props.isReadOnly && (
         <SettingsPanel isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} mode="COUNTER" data={sectionData} updateData={props.updateData!} />
       )}
-      <div className={`${styles.sectionContainer} editable-element`} style={{ background: props.themeConfig?.primaryColor || '#ff5722', color: '#fff', paddingLeft: '60px', paddingRight: '60px' }}>
+      <div className={`${styles.sectionContainer} ${styles.responsivePadding} editable-element`} style={{ background: props.themeConfig?.primaryColor || '#ff5722', color: '#fff' }}>
         {!props.isReadOnly && <EditToolbar onSettingsClick={() => setIsSidebarOpen(true)} />}
-        <div style={{ display: 'flex', justifyContent: 'space-around', width: '100%' }}>
+        <div className={styles.counterGrid}>
            {sectionData.items.map((item: any, i: number) => (
-             <div key={i} style={{ textAlign: 'center' }}>
+             <div key={i} style={{ textAlign: 'center', minWidth: '120px' }}>
                 <div 
                   style={{ fontSize: '48px', fontWeight: 800 }}
                   contentEditable={!props.isReadOnly} 
@@ -301,12 +301,12 @@ export const TestimonialsSection: React.FC<ContentSectionProps> = (props) => {
       {!props.isReadOnly && (
         <SettingsPanel isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} mode="TESTIMONIALS" data={sectionData} updateData={props.updateData!} />
       )}
-      <div className={`${styles.sectionContainer} editable-element`} style={{ paddingLeft: '60px', paddingRight: '60px', background: '#f8fafc' }}>
+      <div className={`${styles.sectionContainer} ${styles.responsivePadding} editable-element`} style={{ background: '#f8fafc' }}>
         {!props.isReadOnly && <EditToolbar onSettingsClick={() => setIsSidebarOpen(true)} />}
-        <h2 style={{ fontSize: '32px', fontWeight: 800, marginBottom: '60px' }}>What People Say</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '40px', width: '100%' }}>
+        <h2 style={{ fontSize: '32px', fontWeight: 800, marginBottom: '40px' }}>What People Say</h2>
+        <div className={styles.responsiveGrid}>
            {sectionData.items.map((t: any, i: number) => (
-             <div key={i} style={{ background: '#fff', padding: '40px', borderRadius: '24px', boxShadow: '0 10px 25px rgba(0,0,0,0.05)', textAlign: 'left' }}>
+             <div key={i} className={styles.testimonialCard}>
                 <i className="fas fa-quote-left" style={{ fontSize: '32px', color: props.themeConfig?.primaryColor || '#ff5722', marginBottom: '20px', display: 'block' }}></i>
                 <p 
                   style={{ fontSize: '18px', fontStyle: 'italic', marginBottom: '20px' }}
@@ -354,17 +354,17 @@ export const CountdownSection: React.FC<ContentSectionProps> = (props) => {
       {!props.isReadOnly && (
         <SettingsPanel isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} mode="COUNTDOWN" data={sectionData} updateData={props.updateData!} />
       )}
-      <div className="editable-element" style={{ background: '#0f172a', color: '#fff', paddingLeft: '60px', paddingRight: '60px', textAlign: 'center' }}>
+      <div className={`${styles.responsivePadding} editable-element`} style={{ background: '#0f172a', color: '#fff', padding: '20px 0', textAlign: 'center' }}>
         {!props.isReadOnly && <EditToolbar onSettingsClick={() => setIsSidebarOpen(true)} />}
         <h2 
-          style={{ marginBottom: '40px' }}
+          style={{ marginBottom: '20px' }}
           contentEditable={!props.isReadOnly} 
           suppressContentEditableWarning 
           onBlur={(e) => props.updateData?.({ ...sectionData, title: e.target.innerText })}
         >
           {sectionData.title}
         </h2>
-        <div style={{ fontSize: '48px', fontWeight: 800 }}>{sectionData.targetDate ? sectionData.targetDate.replace('T', ' ') : '2026-10-15 09:00'}</div>
+        <div className={styles.countdownValue}>{sectionData.targetDate ? sectionData.targetDate.replace('T', ' ') : '2026-10-15 09:00'}</div>
       </div>
     </SectionWrapper>
   );
@@ -380,7 +380,7 @@ export const TextSection: React.FC<ContentSectionProps> = (props) => {
 
   return (
     <SectionWrapper {...props} themeConfig={props.themeConfig} data={sectionData}>
-      <div className={styles.sectionContainer} style={{ paddingLeft: '60px', paddingRight: '60px', textAlign: 'center' }}>
+      <div className={`${styles.sectionContainer} ${styles.responsivePadding}`} style={{ textAlign: 'center' }}>
         <div className="editable-element">
            {!props.isReadOnly && <EditToolbar />}
            <h2 style={{ fontSize: '42px', fontWeight: 800, marginBottom: '24px' }} contentEditable={!props.isReadOnly} suppressContentEditableWarning onBlur={(e) => props.updateData?.({ ...sectionData, title: e.target.innerText })}>{sectionData.title}</h2>
@@ -417,9 +417,9 @@ export const ListSection: React.FC<ContentSectionProps> = (props) => {
        {!props.isReadOnly && (
         <SettingsPanel isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} mode="MEDIA_GROUP" data={sectionData} updateData={props.updateData!} />
       )}
-      <div className={styles.sectionContainer} style={{ paddingLeft: '60px', paddingRight: '60px', '--primary': props.themeConfig?.primaryColor || '#ff5722' } as any}>
+      <div className={`${styles.sectionContainer} ${styles.responsivePadding}`} style={{ '--primary': props.themeConfig?.primaryColor || '#ff5722' } as any}>
         {!props.isReadOnly && <div className="editable-element" style={{ marginBottom: '40px' }}><EditToolbar onSettingsClick={() => setIsSidebarOpen(true)} /></div>}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '40px', width: '100%' }}>
+        <div className={styles.responsiveGrid}>
            {sectionData.items.map((item: any, i: number) => (
              <div key={i} className="editable-element" style={{ textAlign: 'left', padding: '30px', background: '#f8fafc', borderRadius: '20px' }}>
                 <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: `${props.themeConfig?.primaryColor || '#ff5722'}15`, color: props.themeConfig?.primaryColor || '#ff5722', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', marginBottom: '20px' }}>
@@ -463,11 +463,11 @@ export const EmbedWidgetSection: React.FC<ContentSectionProps> = (props) => {
       {!props.isReadOnly && (
         <SettingsPanel isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} mode="WIDGET" data={sectionData} updateData={props.updateData!} />
       )}
-      <div className="editable-element" style={{ paddingLeft: '60px', paddingRight: '60px', textAlign: 'center' }}>
+      <div className={`editable-element ${styles.responsivePadding}`} style={{ padding: '20px 0', textAlign: 'center' }}>
         {!props.isReadOnly && <EditToolbar onSettingsClick={() => setIsSidebarOpen(true)} />}
-        <h2 style={{ fontSize: '32px', fontWeight: 800, marginBottom: '40px' }}>{sectionData.title}</h2>
+        <h2 style={{ fontSize: '32px', fontWeight: 800, marginBottom: '20px' }}>{sectionData.title}</h2>
         <div style={{ width: '100%', maxWidth: '900px', margin: '0 auto' }}>
-           <iframe src={sectionData.embedUrl} style={{ width: '100%', height: '500px', borderRadius: '24px', border: 'none' }} title="Video" allowFullScreen></iframe>
+           <iframe src={sectionData.embedUrl} style={{ width: '100%', height: '500px', borderRadius: '24px', border: 'none' }} title="Video" allowFullScreen className={styles.responsiveIframe}></iframe>
         </div>
       </div>
     </SectionWrapper>
@@ -488,9 +488,9 @@ export const GallerySection: React.FC<ContentSectionProps> = (props) => {
 
   return (
     <SectionWrapper {...props} themeConfig={props.themeConfig} data={sectionData} onSettingsClick={() => {}}>
-      <div className={styles.sectionContainer} style={{ paddingLeft: '60px', paddingRight: '60px', '--primary': props.themeConfig?.primaryColor || '#ff5722' } as any}>
+      <div className={`${styles.sectionContainer} ${styles.responsivePadding}`} style={{ '--primary': props.themeConfig?.primaryColor || '#ff5722' } as any}>
         <h2 style={{ fontSize: '32px', fontWeight: 800, marginBottom: '60px', textAlign: 'center' }}>Event Gallery</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', width: '100%' }}>
+        <div className={styles.responsiveGrid}>
            {sectionData.items.map((item: any, i: number) => (
              <img key={i} src={item.image} style={{ width: '100%', height: '250px', objectFit: 'cover', borderRadius: '12px' }} alt={`Gallery ${i}`} />
            ))}
@@ -646,17 +646,20 @@ export const SponsorsSection: React.FC<ContentSectionProps> = (props) => {
       )}
       <div className={styles.sponsorsSection} style={{ '--primary': props.themeConfig?.primaryColor || '#ff5722' } as any}>
         <h2 
-          style={{ fontSize: '24px', fontWeight: 800, marginBottom: '60px', textAlign: 'center', opacity: 0.5 }}
+          className={styles.subtitle}
+          style={{ marginBottom: '40px', textAlign: 'center', opacity: 0.6, width: '100%' }}
           contentEditable={!props.isReadOnly} 
           suppressContentEditableWarning 
           onBlur={(e) => props.updateData?.({ ...sectionData, title: e.target.innerText })}
         >
           {sectionData.title}
         </h2>
-        {!props.isReadOnly && <EditToolbar onSettingsClick={() => setIsSidebarOpen(true)} />}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '60px', justifyContent: 'center', alignItems: 'center' }}>
+        {!props.isReadOnly && <div style={{ marginBottom: '20px' }}><EditToolbar onSettingsClick={() => setIsSidebarOpen(true)} /></div>}
+        <div className={styles.flexCenter}>
           {sectionData.items.map((s: any, i: number) => (
-            <img key={i} src={s.image} style={{ height: '50px', filter: 'grayscale(100%) opacity(0.6)', transition: '0.3s' }} onMouseOver={e => e.currentTarget.style.filter = 'none'} onMouseOut={e => e.currentTarget.style.filter = 'grayscale(100%) opacity(0.6)'} alt={s.name} />
+            <div key={i} className={styles.movingLineItem}>
+              <img src={s.image} className={styles.movingLineImage} style={{ height: '45px' }} alt={s.name} />
+            </div>
           ))}
         </div>
       </div>
@@ -690,10 +693,10 @@ export const SponsorCategorySection: React.FC<ContentSectionProps> = (props) => 
       <div className={styles.sectionContainer} style={{ paddingLeft: '60px', paddingRight: '60px', '--primary': props.themeConfig?.primaryColor || '#ff5722' } as any}>
         {sectionData.categories.map((cat: any, i: number) => (
           <div key={i} style={{ marginBottom: '60px', width: '100%' }}>
-             <h3 style={{ textAlign: 'center', marginBottom: '40px', fontWeight: 800, fontSize: '24px' }}>{cat.name} Sponsors</h3>
-             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '40px', justifyContent: 'center', alignItems: 'center' }}>
+             <h3 style={{ textAlign: 'center', marginBottom: '40px', fontWeight: 800, fontSize: '20px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '2px' }}>{cat.name} Sponsors</h3>
+             <div className={styles.flexCenter} style={{ gap: '80px' }}>
                 {cat.sponsors.map((s: any, j: number) => (
-                  <img key={j} src={s.image} style={{ height: '40px' }} alt={s.name} />
+                  <img key={j} src={s.image} style={{ height: '40px', filter: 'grayscale(100%) opacity(0.7)' }} alt={s.name} />
                 ))}
              </div>
           </div>
@@ -830,7 +833,7 @@ export const FloorPlanSection: React.FC<ContentSectionProps> = (props) => {
 
   return (
     <SectionWrapper {...props} themeConfig={props.themeConfig} data={sectionData}>
-      <div style={{ paddingLeft: '60px', paddingRight: '60px', textAlign: 'center' }}>
+      <div style={{ padding: '20px 60px', textAlign: 'center' }}>
         <h2 
           style={{ fontSize: '32px', fontWeight: 800 }}
           contentEditable={!props.isReadOnly} 
@@ -839,7 +842,7 @@ export const FloorPlanSection: React.FC<ContentSectionProps> = (props) => {
         >
           {sectionData.title}
         </h2>
-        <img src={sectionData.image} style={{ width: '100%', maxWidth: '1000px', marginTop: '40px', borderRadius: '24px', boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }} alt="Floor Plan" />
+        <img src={sectionData.image} style={{ width: '100%', maxWidth: '1000px', marginTop: '20px', borderRadius: '24px', boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }} alt="Floor Plan" />
       </div>
     </SectionWrapper>
   );
@@ -955,9 +958,9 @@ export const ContactFormSection: React.FC<ContentSectionProps> = (props) => {
   return (
     <SectionWrapper {...props} themeConfig={props.themeConfig} data={sectionData} onSettingsClick={() => setIsSidebarOpen(true)}>
       {!props.isReadOnly && (
-        <SettingsPanel isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} mode="CONTACT" data={sectionData} updateData={props.updateData!} />
+        <SettingsPanel isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} mode="SECTION" data={sectionData} updateData={props.updateData!} />
       )}
-      <div style={{ padding: '100px 60px', background: '#f8fafc' }}>
+      <div style={{ padding: '20px 60px', background: '#f8fafc' }}>
         <div style={{ maxWidth: '600px', margin: '0 auto', background: '#fff', padding: '40px', borderRadius: '24px', boxShadow: '0 20px 40px rgba(0,0,0,0.05)' }}>
            <h2 style={{ textAlign: 'center', marginBottom: '10px' }} contentEditable={!props.isReadOnly} suppressContentEditableWarning onBlur={(e) => props.updateData?.({ ...sectionData, title: e.target.innerText })}>{sectionData.title}</h2>
            <p style={{ textAlign: 'center', color: '#64748b', marginBottom: '30px' }}>{sectionData.subtitle}</p>
@@ -983,7 +986,7 @@ export const WhyAttendSection: React.FC<ContentSectionProps> = (props) => {
   return (
     <SectionWrapper {...props} themeConfig={props.themeConfig} data={sectionData} onSettingsClick={() => setIsSidebarOpen(true)}>
       {!props.isReadOnly && (
-        <SettingsPanel isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} mode="WHY_ATTEND" data={sectionData} updateData={props.updateData!} />
+        <SettingsPanel isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} mode="SECTION" data={sectionData} updateData={props.updateData!} />
       )}
       <div className={styles.sectionContainer} style={{ textAlign: 'center', paddingLeft: '60px', paddingRight: '60px', '--primary': props.themeConfig?.primaryColor || '#ff5722' } as any}>
         <div className="editable-element">
@@ -1107,18 +1110,17 @@ export const MovingLineSection: React.FC<any> = (props) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
   const items = (data.items && data.items.length > 0) ? data.items : [
-    { type: 'text', content: 'LATEST NEWS' },
     { type: 'image', content: 'https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg' },
-    { type: 'text', content: 'UPCOMING SESSIONS' },
     { type: 'image', content: 'https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg' },
-    { type: 'text', content: 'GLOBAL SUMMIT 2026' },
     { type: 'image', content: 'https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg' },
-    { type: 'text', content: 'REGISTER NOW' }
+    { type: 'image', content: 'https://upload.wikimedia.org/wikipedia/commons/7/7b/Meta_Platforms_Inc._logo.svg' },
+    { type: 'image', content: 'https://upload.wikimedia.org/wikipedia/commons/e/e8/Tesla_logo.png' },
+    { type: 'image', content: 'https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg' }
   ];
 
-  const speed = data.speed || 30;
+  const speed = data.speed || 40;
   const direction = data.direction || 'left';
-  const gap = data.gap || 60;
+  const gap = data.gap || 80;
   const backgroundColor = data.backgroundColor || '#ffffff';
   const textColor = data.textColor || '#0f172a';
   const fontSize = data.fontSize || '24px';
@@ -1143,16 +1145,18 @@ export const MovingLineSection: React.FC<any> = (props) => {
         style={{ 
           backgroundColor: backgroundColor,
           border: 'none',
-          padding: '20px 0',
+          padding: '40px 0',
           '--item-gap': `${gap}px`,
-          '--image-filter': grayscaleImages ? 'grayscale(100%) opacity(0.7)' : 'none'
+          '--image-filter': grayscaleImages ? 'grayscale(100%) opacity(0.6)' : 'none',
+          '--speed': `${speed}s`
         } as any}
       >
         <div 
           className={styles.movingLineTrack} 
           style={{ 
             animationDuration: `${speed}s`,
-            animationDirection: direction === 'right' ? 'reverse' : 'normal'
+            animationDirection: direction === 'right' ? 'reverse' : 'normal',
+            gap: `${gap}px`
           }}
         >
           {displayItems.map((item: any, i: number) => (
@@ -1160,7 +1164,7 @@ export const MovingLineSection: React.FC<any> = (props) => {
               {item.type === 'image' ? (
                 <img src={item.content} alt="Logo" className={styles.movingLineImage} />
               ) : (
-                <span>{item.content}</span>
+                <span className={styles.movingLineText}>{item.content}</span>
               )}
             </div>
           ))}

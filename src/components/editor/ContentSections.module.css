@@ -1,17 +1,70 @@
 .sectionContainer {
   background-color: white;
-  padding: 0 60px; /* Removed vertical padding */
+  padding: 20px 60px; /* Reduced from 40px */
   text-align: center;
-  border-radius: 0; /* Removed border-radius for full width look */
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--dynamic-gap, 24px);
+  gap: var(--dynamic-gap, 24px); /* Reduced gap */
   width: 100%;
-  max-width: 100%; /* Changed from 1200px */
+  max-width: 100%;
   margin: 0;
   border: none;
-  border-bottom: 1px solid var(--slate-100);
+  border-bottom: 1px solid rgba(0,0,0,0.03);
+  animation: fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.sectionContainer:nth-child(even) {
+  background-color: #fcfcfd; /* Subtle alternating background */
+}
+
+@media (max-width: 768px) {
+  .sectionContainer {
+    padding: 40px 16px;
+    gap: 24px;
+  }
+}
+
+.responsivePadding {
+  padding-left: 60px !important;
+  padding-right: 60px !important;
+}
+
+.flexResponsive {
+  display: flex !important;
+  flex-direction: row;
+  align-items: center;
+  gap: 60px;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .responsivePadding {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  .flexResponsive {
+    flex-direction: column !important;
+    gap: 24px !important;
+    text-align: center !important;
+  }
+}
+
+:global(.is-mobile-preview) .responsivePadding {
+  padding-left: 16px !important;
+  padding-right: 16px !important;
+}
+
+:global(.is-mobile-preview) .flexResponsive {
+  flex-direction: column !important;
+  gap: 30px !important;
+  text-align: center !important;
 }
 
 .sectionContainer h2 {
@@ -90,27 +143,45 @@
   justify-content: center;
 }
 
-.secondaryBtn {
-  background-color: white;
-  color: var(--slate-700);
-  border: 1px solid var(--slate-200);
-  padding: calc(12px * var(--content-scale, 1)) calc(28px * var(--content-scale, 1));
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
+.responsiveGrid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 30px;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .responsiveGrid {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+  }
+}
+
+.testimonialCard {
+  background: #fff;
+  padding: 40px;
+  border-radius: 24px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+  text-align: left;
+  transition: all 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  .testimonialCard {
+    padding: 24px;
+    border-radius: 16px;
+  }
 }
 
 .speakersSection {
-  background: linear-gradient(to bottom, #ffffff 0%, #fff5f0 100%);
-  padding: 0 60px;
- /* Reduced from 100px */
-  border-radius: 0; /* Removed border-radius */
+  background: linear-gradient(to bottom, #ffffff 0%, var(--speaker-bg, color-mix(in srgb, var(--primary, #ff6b00), white 95%)) 100%);
+  padding: 15px 60px;
+  border-radius: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--dynamic-gap, 24px);
+  gap: 16px;
   width: 100%;
-  max-width: 100%; /* Changed from 1200px */
+  max-width: 100%;
   margin: 0;
   border: none;
   border-bottom: 1px solid var(--slate-100);
@@ -118,7 +189,7 @@
 
 .speakersHeader {
   text-align: left;
-  margin-bottom: var(--dynamic-gap, 24px);
+  margin-bottom: 12px;
 }
 
 .speakersHeader h2 {
@@ -181,8 +252,8 @@
 }
 
 .featuredSessionsSection {
-  background: linear-gradient(to bottom, #ffffff 0%, #fff5f0 100%);
-  padding: 0 60px;
+  background: linear-gradient(to bottom, #ffffff 0%, var(--section-bg, color-mix(in srgb, var(--primary, #ff6b00), white 95%)) 100%);
+  padding: 15px 60px;
  /* Reduced from 100px */
   border-radius: 0;
   display: flex;
@@ -196,8 +267,8 @@
 }
 
 .sponsorsSection {
-  background: linear-gradient(to bottom, #ffffff 0%, #fff5f0 100%);
-  padding: 0 60px;
+  background: linear-gradient(to bottom, #ffffff 0%, var(--section-bg, color-mix(in srgb, var(--primary, #ff6b00), white 95%)) 100%);
+  padding: 15px 60px;
  /* Reduced from 100px */
   border-radius: 0;
   display: flex;
@@ -224,7 +295,7 @@
 
 .venueSection {
   background: linear-gradient(to bottom, #ffffff 0%, #f8fafc 100%);
-  padding: calc(80px * var(--content-scale, 1)) 60px;
+  padding: 15px 60px;
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -430,45 +501,51 @@
 .speakerCard {
   background: white;
   border-radius: 20px;
-  padding: var(--dynamic-item-padding, 35px) 25px;
+  padding: 32px 20px;
   text-align: center;
   border: 1px solid #f1f5f9;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  flex: 1 1 280px;
-  max-width: 350px;
+  flex: 1 1 200px;
+  max-width: 250px;
   position: relative;
   overflow: hidden;
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .addSpeakerBtn {
-  margin: var(--dynamic-gap, 40px) auto 0;
+  margin: 12px auto 0;
   background: white;
   color: var(--primary, #ff6b00);
-  border: 2px dashed var(--primary, #ff6b00);
-  padding: 16px 32px;
-  border-radius: 16px;
+  border: 1.5px dashed var(--primary, #ff6b00);
+  padding: 8px 20px;
+  border-radius: 12px;
   font-weight: 700;
+  font-size: 13px;
   cursor: pointer;
   transition: all 0.2s;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .addItemBtn {
-  margin: var(--dynamic-gap, 40px) auto 0;
+  margin: 12px auto 0;
   background: white;
   color: var(--slate-900);
-  border: 2px dashed var(--slate-300);
-  padding: 16px 32px;
-  border-radius: 16px;
+  border: 1.5px dashed var(--slate-300);
+  padding: 8px 20px;
+  border-radius: 12px;
   font-weight: 700;
+  font-size: 13px;
   cursor: pointer;
   transition: all 0.2s;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .addItemBtn:hover {
@@ -488,19 +565,19 @@
 }
 
 .speakerCard:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
   border-color: var(--primary, #ff6b00);
 }
 
 .speakerImgWrapper {
-  width: calc(140px * var(--content-scale, 1));
-  height: calc(140px * var(--content-scale, 1));
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   overflow: hidden;
-  margin: 0 auto calc(24px * var(--content-scale, 1));
-  border: 4px solid #fff5f0;
-  box-shadow: 0 8px 16px rgba(255, 107, 0, 0.1);
+  margin: 0 auto 12px;
+  border: 3px solid color-mix(in srgb, var(--primary, #ff6b00), white 80%);
+  box-shadow: 0 4px 8px rgba(255, 107, 0, 0.1);
   transition: all 0.3s ease;
 }
 
@@ -511,10 +588,10 @@
 
 .cardActions {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 8px;
+  right: 8px;
   display: flex;
-  gap: 8px;
+  gap: 6px;
   opacity: 0;
   transition: opacity 0.2s;
   z-index: 10;
@@ -525,8 +602,8 @@
 }
 
 .cardActionBtn {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   background: white;
   border: 1px solid #f1f5f9;
@@ -535,7 +612,7 @@
   justify-content: center;
   cursor: pointer;
   color: #64748b;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   transition: all 0.2s;
 }
 
@@ -569,7 +646,7 @@
 
 .imageOverlay i {
   color: white;
-  font-size: 20px;
+  font-size: 16px;
 }
 
 .speakerImgWrapper img {
@@ -579,18 +656,18 @@
 }
 
 .speakerName {
-  font-size: calc(20px * var(--content-scale, 1));
+  font-size: 16px;
   font-weight: 800;
   color: #1e293b;
-  margin-bottom: 6px;
+  margin-bottom: 2px;
   letter-spacing: -0.01em;
 }
 
 .speakerRole {
-  font-size: calc(14px * var(--content-scale, 1));
+  font-size: 12px;
   color: #64748b;
   font-weight: 600;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -598,8 +675,8 @@
 .speakerSocials {
   display: flex;
   justify-content: center;
-  gap: 12px;
-  margin-top: 20px;
+  gap: 10px;
+  margin-top: 12px;
   opacity: 0.6;
   transition: opacity 0.3s;
 }
@@ -700,7 +777,7 @@
 /* Agenda Section Styles */
 .agendaSection {
   background: white;
-  padding: 80px 60px;
+  padding: 15px 60px;
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -708,7 +785,7 @@
 
 .agendaTimeline {
   max-width: 900px;
-  margin: 40px auto 0;
+  margin: 10px auto 0;
   position: relative;
   width: 100%;
   padding-left: 20px;
@@ -727,7 +804,7 @@
 .agendaItem {
   display: flex;
   gap: 40px;
-  margin-bottom: 40px;
+  margin-bottom: 10px;
   position: relative;
   text-align: left;
 }
@@ -816,7 +893,7 @@
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
   .sectionContainer {
-    padding: 40px 24px;
+    padding: 32px 16px;
   }
 
   .sectionContainer h2 {
@@ -824,7 +901,7 @@
   }
 
   .speakersSection, .featuredSessionsSection, .sponsorsSection, .agendaSection, .venueSection {
-    padding: 40px 24px;
+    padding: 32px 16px;
   }
 
   .speakersHeader h2 {
@@ -832,49 +909,71 @@
   }
 
   .venueNameText {
-    font-size: 28px;
+    font-size: 24px;
   }
 
   .venueInfoCard {
-    padding: 30px 20px;
+    padding: 24px 16px;
+  }
+
+  .venueImageWrapper {
+    flex: 0 0 220px;
   }
 
   .venueDetailRows {
-    gap: 20px;
+    gap: 16px;
   }
 
   .speakersGrid, .sponsorsGrid {
-    gap: 20px;
+    gap: 12px !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
   }
 
-  .speakerCard {
-    flex: 1 1 100%;
-    max-width: 100%;
-    padding: 30px 20px;
+  .speakerCard, .sponsorCard {
+    flex: 1 1 0% !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 16px 10px !important;
+    min-height: auto !important;
+  }
+
+  .speakerImgWrapper {
+    width: 60px !important;
+    height: 60px !important;
+  }
+
+  .speakerName {
+    font-size: 14px !important;
+  }
+
+  .speakerRole {
+    font-size: 10px !important;
   }
 
   .agendaTimeline::before {
-    left: 20px;
+    left: 15px;
   }
 
   .agendaItem {
     flex-direction: column;
-    gap: 15px;
-    padding-left: 40px;
+    gap: 10px;
+    padding-left: 35px;
   }
 
   .agendaTime {
     flex: none;
     padding-top: 0;
+    font-size: 12px;
   }
 
   .agendaDot {
-    left: 16px;
-    top: 5px;
+    left: 11px;
+    top: 4px;
   }
 
   .agendaContent {
-    padding: 20px;
+    padding: 16px;
   }
 
   .agendaItem:hover .agendaContent {
@@ -888,8 +987,95 @@
   .addItemBtn, .addSpeakerBtn {
     width: 100%;
     justify-content: center;
-    padding: 14px 20px;
+    padding: 12px 16px;
   }
+}
+
+:global(.is-mobile-preview) .sectionContainer {
+  padding: 32px 16px;
+}
+
+:global(.is-mobile-preview) .sectionContainer h2 {
+  font-size: 24px;
+}
+
+:global(.is-mobile-preview) .speakersSection,
+:global(.is-mobile-preview) .featuredSessionsSection,
+:global(.is-mobile-preview) .sponsorsSection,
+:global(.is-mobile-preview) .agendaSection,
+:global(.is-mobile-preview) .venueSection {
+  padding: 32px 16px;
+}
+
+:global(.is-mobile-preview) .speakersHeader h2 {
+  font-size: 24px;
+}
+
+:global(.is-mobile-preview) .venueNameText {
+  font-size: 24px;
+}
+
+:global(.is-mobile-preview) .venueInfoCard {
+  padding: 24px 16px;
+}
+
+:global(.is-mobile-preview) .venueImageWrapper {
+  flex: 0 0 220px;
+}
+
+:global(.is-mobile-preview) .venueDetailRows {
+  gap: 16px;
+}
+
+:global(.is-mobile-preview) .speakersGrid,
+:global(.is-mobile-preview) .sponsorsGrid {
+  gap: 16px;
+}
+
+:global(.is-mobile-preview) .speakerCard {
+  flex: 1 1 100%;
+  max-width: 100%;
+  padding: 24px 16px;
+}
+
+:global(.is-mobile-preview) .agendaTimeline::before {
+  left: 15px;
+}
+
+:global(.is-mobile-preview) .agendaItem {
+  flex-direction: column;
+  gap: 10px;
+  padding-left: 35px;
+}
+
+:global(.is-mobile-preview) .agendaTime {
+  flex: none;
+  padding-top: 0;
+  font-size: 12px;
+}
+
+:global(.is-mobile-preview) .agendaDot {
+  left: 11px;
+  top: 4px;
+}
+
+:global(.is-mobile-preview) .agendaContent {
+  padding: 16px;
+}
+
+:global(.is-mobile-preview) .agendaItem:hover .agendaContent {
+  transform: none;
+}
+
+:global(.is-mobile-preview) .mediaGroupItem {
+  width: 100%;
+}
+
+:global(.is-mobile-preview) .addItemBtn,
+:global(.is-mobile-preview) .addSpeakerBtn {
+  width: 100%;
+  justify-content: center;
+  padding: 12px 16px;
 }
 
 /* Moving Line Styles */
@@ -897,49 +1083,81 @@
   width: 100%;
   overflow: hidden;
   background: white;
-  padding: 30px 0;
+  padding: 40px 0;
   white-space: nowrap;
   position: relative;
   display: flex;
   align-items: center;
 }
 
+/* Add mask for fading edges - gives it a high-end feel */
+.movingLineSection::before,
+.movingLineSection::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 150px;
+  height: 100%;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.movingLineSection::before {
+  left: 0;
+  background: linear-gradient(to right, white, transparent);
+}
+
+.movingLineSection::after {
+  right: 0;
+  background: linear-gradient(to left, white, transparent);
+}
+
 .movingLineTrack {
   display: flex;
   align-items: center;
-  white-space: nowrap;
-  animation: scroll linear infinite;
-  padding-left: 0;
-  gap: var(--item-gap, 50px);
+  width: max-content;
+  animation: scroll var(--speed, 30s) linear infinite;
+  gap: var(--item-gap, 80px);
+  padding-left: var(--item-gap, 80px);
 }
 
 .movingLineItem {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
-  font-weight: 800;
-  text-transform: uppercase;
-  color: #0f172a;
   flex-shrink: 0;
+  transition: transform 0.3s ease;
+}
+
+.movingLineItem:hover {
+  transform: scale(1.1);
 }
 
 .movingLineImage {
-  height: 40px;
+  height: 50px;
   width: auto;
+  max-width: 180px;
   object-fit: contain;
-  filter: var(--image-filter, none);
+  filter: var(--image-filter, grayscale(100%) opacity(0.6));
   transition: all 0.3s ease;
 }
 
-.movingLineImage:hover {
+.movingLineItem:hover .movingLineImage {
   filter: none;
-  transform: scale(1.05);
+  opacity: 1;
+}
+
+.movingLineText {
+  font-size: 24px;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #0f172a;
+  letter-spacing: 2px;
 }
 
 @keyframes scroll {
   0% { transform: translateX(0); }
-  100% { transform: translateX(calc(-50% - (var(--item-gap, 50px) / 2))); }
+  100% { transform: translateX(-50%); }
 }
 
 @media (max-width: 480px) {
@@ -958,5 +1176,47 @@
 
   .eventTitle {
     font-size: 16px;
+  }
+}
+
+.flexCenter {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 60px;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .flexCenter {
+    gap: 30px;
+  }
+}
+
+.counterGrid {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+@media (max-width: 480px) {
+  .counterGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+}
+
+.countdownValue {
+  font-size: 48px;
+  font-weight: 800;
+}
+
+@media (max-width: 768px) {
+  .countdownValue {
+    font-size: 28px;
   }
 }

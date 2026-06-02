@@ -11,6 +11,7 @@ interface PagesPanelProps {
   onDeleteProfile: (id: string) => void;
   onUpdateProfile: (id: string, newData: any) => void;
   onClose: () => void;
+  variant?: 'sidebar' | 'bottom';
 }
 
 const PagesPanel: React.FC<PagesPanelProps> = ({
@@ -20,7 +21,8 @@ const PagesPanel: React.FC<PagesPanelProps> = ({
   onAddProfile,
   onDeleteProfile,
   onUpdateProfile,
-  onClose
+  onClose,
+  variant = 'sidebar'
 }) => {
   const [isAdding, setIsAdding] = useState(false);
   const [newPageName, setNewPageName] = useState('');
@@ -74,22 +76,8 @@ const PagesPanel: React.FC<PagesPanelProps> = ({
     setMenuOpenId(null);
   };
 
-  return (
-    <div className={styles.panel} style={{ 
-      position: 'relative', right: 0, height: '100%', width: '320px', 
-      borderRight: '1px solid #e2e8f0', backgroundColor: '#ffffff', // White BG
-      boxShadow: 'none', display: 'flex', flexDirection: 'column', color: '#333'
-    }}>
-      {/* Header */}
-      <div style={{ padding: '24px 20px', borderBottom: '1px solid #eee', backgroundColor: '#ffffff' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#1e293b' }}>
-            Pages ({profiles.length})
-          </h3>
-          <button onClick={onClose} style={{ fontSize: '20px', background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8' }}>&times;</button>
-        </div>
-      </div>
-
+  const content = (
+    <>
       <div style={{ padding: '15px 20px' }}>
         {/* Purple Add Page Button */}
         <button 
@@ -182,15 +170,15 @@ const PagesPanel: React.FC<PagesPanelProps> = ({
         </div>
       </div>
 
-      {/* Add Page Modal */}
+      {/* Add Page Modal - Rendered inside content so it's available in both variants */}
       {isAdding && (
         <div style={{ 
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
-          background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 
+          background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 
         }} onClick={() => setIsAdding(false)}>
           <div style={{ 
             background: '#fff', padding: '25px', borderRadius: '12px', 
-            width: '350px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' 
+            width: '90%', maxWidth: '350px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' 
           }} onClick={e => e.stopPropagation()}>
             <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '15px' }}>Add New Page</h3>
             <input 
@@ -206,6 +194,35 @@ const PagesPanel: React.FC<PagesPanelProps> = ({
           </div>
         </div>
       )}
+    </>
+  );
+
+  if (variant === 'bottom') {
+    return (
+      <div style={{ padding: '0 0 20px 0' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px', borderBottom: '1px solid #f1f5f9' }}>
+          <h3 style={{ fontSize: '16px', fontWeight: '800', color: '#0f172a', textTransform: 'uppercase', letterSpacing: '1px', margin: 0 }}>Pages ({profiles.length})</h3>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '24px', color: '#64748b', cursor: 'pointer' }}>&times;</button>
+        </div>
+        <div style={{ maxHeight: '60vh', overflowY: 'auto' }}>
+          {content}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`${styles.panel} ${styles.open}`}>
+      {/* Header */}
+      <div className={styles.header}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+          <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#1e293b' }}>
+            Pages ({profiles.length})
+          </h3>
+          <button onClick={onClose} className={styles.closeBtn}>&times;</button>
+        </div>
+      </div>
+      {content}
     </div>
   );
 };

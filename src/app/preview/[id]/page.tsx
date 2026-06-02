@@ -27,6 +27,7 @@ import Footer from "@/components/Footer";
 import { useEffect, useState, use } from "react";
 import ThemeOne from "@/components/editor/ThemeOne";
 import ThemeTwo from "@/components/editor/ThemeTwo";
+import ThemeThree from "@/components/editor/ThemeThree";
 
 export default function PreviewPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -40,16 +41,18 @@ export default function PreviewPage({ params }: { params: Promise<{ id: string }
 
   useEffect(() => {
     if (!id) return;
-    
+    console.log("Fetching website with ID:", id);
     setLoading(true);
     fetch(`/api/websites`)
       .then(res => {
-        if (!res.ok) throw new Error("Failed to fetch websites");
+        if (!res.ok) throw new Error("Failed to fetch websites from API");
         return res.json();
       })
       .then(data => {
+        console.log("All websites received:", data.length);
         const current = data.find((w: any) => w.id === parseInt(id));
         if (current) {
+          console.log("Website found:", current.title);
           setWebsite(current);
           if (current.content?.eventProfiles) {
             const defaultProfile = current.content.eventProfiles.find((p: any) => p.isDefault) || current.content.eventProfiles[0];
@@ -59,23 +62,31 @@ export default function PreviewPage({ params }: { params: Promise<{ id: string }
             }
           }
         } else {
-          setError("Website not found");
+          console.error("Website not found in the list for ID:", id);
+          setError(`Website with ID "${id}" not found. Please ensure you have saved your work in the editor.`);
         }
       })
       .catch(err => {
-        console.error("Error loading preview:", err);
-        setError("Failed to load website preview");
+        console.error("Preview fetch error:", err);
+        setError("Error loading preview: " + err.message);
       })
-      .finally(() => {
-        setLoading(false);
-      });
+      .finally(() => setLoading(false));
   }, [id]);
 
   if (loading) return (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', flexDirection: 'column', gap: '20px', color: '#64748b' }}>
-      <div style={{ width: '40px', height: '40px', border: '3px solid #f3f3f3', borderTop: '3px solid #ff6b00', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+      <div style={{ 
+        width: '40px', 
+        height: '40px', 
+        border: '3px solid #f3f3f3', 
+        borderTop: '3px solid #ff6b00', 
+        borderRadius: '50%',
+        animation: 'spin-preview 1s linear infinite'
+      }}></div>
       <p>Loading your event website...</p>
-      <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+      <style>{`
+        @keyframes spin-preview { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+      `}</style>
     </div>
   );
 
@@ -144,6 +155,7 @@ export default function PreviewPage({ params }: { params: Promise<{ id: string }
         profiles={eventProfiles}
         footerData={website.content?.footerData}
         onUpdateFooter={() => {}}
+        onTabChange={handleTabChange}
       />
     );
   }
@@ -157,12 +169,14 @@ export default function PreviewPage({ params }: { params: Promise<{ id: string }
         profiles={eventProfiles}
         footerData={website.content?.footerData}
         onUpdateFooter={() => {}}
+        onTabChange={handleTabChange}
       />
     );
   }
 
   return (
     <div style={{ backgroundColor: themeConfig.backgroundColor, color: themeConfig.textColor, minHeight: '100vh' }}>
+
       <EventNavbar 
         activeTab={activeTab} 
         onTabChange={handleTabChange} 

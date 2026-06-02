@@ -1,8 +1,14 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
+  --background: #fafafa;
   --foreground: #171717;
+  
+  /* Brand Palette */
+  --primary: #F7BE39;
+  --primary-hover: #e5af33;
+  --secondary: #f97316;
+  --accent: #2dd4bf;
   
   /* Slate Palette */
   --slate-50: #f8fafc;
@@ -16,11 +22,11 @@
   --slate-800: #1e293b;
   --slate-900: #0f172a;
 
-  /* Primary & Theme */
-  --primary: #3b82f6;
-  --primary-hover: #2563eb;
+  /* Brand Shadows */
+  --brand-md: 0 4px 20px -1px rgba(247, 190, 57, 0.15), 0 2px 10px -2px rgba(247, 190, 57, 0.1);
+  --brand-lg: 0 20px 25px -5px rgba(247, 190, 57, 0.2), 0 10px 10px -5px rgba(247, 190, 57, 0.1);
   
-  /* Shadows */
+  /* Standard Shadows */
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
@@ -33,11 +39,27 @@
   }
 }
 
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+  position: relative;
+  margin: 0;
+  padding: 0;
+}
+
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-  overflow-x: hidden;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
+
+code, pre {
+  font-family: var(--font-geist-mono), monospace;
+}
+
+* {
+  box-sizing: border-box;
 }
 
 /* Global Responsive Utilities */
@@ -64,4 +86,13 @@ body {
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background: rgba(0,0,0,0.1);
   border-radius: 10px;
+}
+
+/* Google Maps Autocomplete Dropdown Fix */
+.pac-container {
+  z-index: 10000 !important;
+  border-radius: 8px;
+  margin-top: 5px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
 }

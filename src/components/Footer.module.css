@@ -1,7 +1,7 @@
 .footer {
   background-color: #0f172a;
   color: #f8fafc;
-  padding: 80px 0 40px;
+  padding: 40px 0 20px;
   font-family: var(--font-inter, sans-serif);
 }
 
@@ -14,14 +14,14 @@
 .topSection {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr 2fr;
-  gap: 48px;
-  margin-bottom: 64px;
+  gap: 32px;
+  margin-bottom: 40px;
 }
 
 .brand {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 }
 
 .logo {
@@ -196,4 +196,13 @@
     flex-direction: column;
     text-align: center;
   }
+}
+
+:global(.is-mobile-preview) .topSection {
+  grid-template-columns: 1fr;
+}
+
+:global(.is-mobile-preview) .bottomSection {
+  flex-direction: column;
+  text-align: center;
 }

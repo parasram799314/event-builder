@@ -37,6 +37,7 @@ interface ThemeOneProps {
   onMoveDown?: (index: number) => void;
   onDelete?: (index: number) => void;
   onAddClick?: (index: number | null) => void;
+  forceMobile?: boolean;
 }
 
 // ─── Editable Components ───────────────────────────────────────────────────
@@ -50,37 +51,56 @@ const ThemeSectionWrapper = ({
   onAddClick,
   onSettingsClick,
   isFirst,
-  isLast 
+  isLast,
+  forceMobile
 }: any) => {
   if (isReadOnly) return <>{children}</>;
 
+  const showControlsClass = forceMobile ? "opacity-100" : "opacity-0 group-hover:opacity-100";
+
   return (
-    <div className="group relative">
-      <div className="absolute left-4 top-1/2 -translate-y-1/2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all z-[100]">
+    <div className={`group relative border-y-2 border-transparent hover:border-blue-500/50 transition-all duration-300 my-2 ${forceMobile ? 'is-mobile-editor' : ''}`}>
+      {/* Add Section Button Above */}
+      {isFirst && (
+        <div className={`absolute top-0 left-0 right-0 -translate-y-1/2 flex items-center justify-center transition-all z-[9999] h-10 pointer-events-none ${showControlsClass}`}>
+          <button 
+            onClick={() => onAddClick(index)}
+            className="bg-blue-600 text-white px-5 py-2 rounded-full flex items-center gap-2 shadow-[0_0_20px_rgba(37,99,235,0.4)] hover:scale-110 hover:bg-blue-700 transition-all cursor-pointer font-bold text-xs pointer-events-auto border-2 border-white section-control-btn"
+          >
+            <i className="fas fa-plus"></i> Add Section
+          </button>
+        </div>
+      )}
+
+      {/* Side Controls */}
+      <div className={`absolute right-6 top-6 flex flex-col gap-2 transition-all z-[999] ${showControlsClass}`}>
         {!isFirst && (
-          <button onClick={() => onMoveUp(index)} className="w-8 h-8 bg-white shadow-lg rounded-full flex items-center justify-center hover:bg-blue-50 text-slate-600">
+          <button onClick={() => onMoveUp(index)} className="w-10 h-10 bg-white shadow-xl rounded-xl flex items-center justify-center hover:bg-blue-50 text-slate-700 border border-slate-100 transition-colors section-control-btn">
             <i className="fas fa-arrow-up text-xs"></i>
           </button>
         )}
         {!isLast && (
-          <button onClick={() => onMoveDown(index)} className="w-8 h-8 bg-white shadow-lg rounded-full flex items-center justify-center hover:bg-blue-50 text-slate-600">
+          <button onClick={() => onMoveDown(index)} className="w-10 h-10 bg-white shadow-xl rounded-xl flex items-center justify-center hover:bg-blue-50 text-slate-700 border border-slate-100 transition-colors section-control-btn">
             <i className="fas fa-arrow-down text-xs"></i>
           </button>
         )}
-        <button onClick={() => onSettingsClick()} className="w-8 h-8 bg-white shadow-lg rounded-full flex items-center justify-center hover:bg-blue-50 text-slate-600">
+        <button onClick={() => onSettingsClick()} className="w-10 h-10 bg-white shadow-xl rounded-xl flex items-center justify-center hover:bg-blue-50 text-slate-700 border border-slate-100 transition-colors section-control-btn">
           <i className="fas fa-cog text-xs"></i>
         </button>
-        <button onClick={() => onDelete(index)} className="w-8 h-8 bg-white shadow-lg rounded-full flex items-center justify-center hover:bg-red-50 text-red-500">
+        <button onClick={() => onDelete(index)} className="w-10 h-10 bg-white shadow-xl rounded-xl flex items-center justify-center hover:bg-red-50 text-red-500 border border-red-50 transition-colors section-control-btn">
           <i className="fas fa-trash-alt text-xs"></i>
         </button>
       </div>
+
       {children}
-      <div className="h-4 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
+
+      {/* Add Section Button Below */}
+      <div className={`absolute bottom-0 left-0 right-0 translate-y-1/2 flex items-center justify-center transition-all z-[9999] h-10 pointer-events-none ${showControlsClass}`}>
         <button 
           onClick={() => onAddClick(index + 1)}
-          className="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
+          className="bg-blue-600 text-white px-5 py-2 rounded-full flex items-center gap-2 shadow-[0_0_20px_rgba(37,99,235,0.4)] hover:scale-110 hover:bg-blue-700 transition-all cursor-pointer font-bold text-xs pointer-events-auto border-2 border-white section-control-btn"
         >
-          <i className="fas fa-plus text-[10px]"></i>
+          <i className="fas fa-plus"></i> Add Section
         </button>
       </div>
     </div>
@@ -218,15 +238,20 @@ const Navbar = ({ primaryColor, isReadOnly, logo, profiles, onTabChange, section
   const homeProfile = profiles?.find(p => p.isDefault || p.id === 'home') || profiles?.[0];
   const isCurrentlyHome = sections && homeProfile && sections === homeProfile.sections;
 
-  // 1. Always get section links from the HOME profile for consistency
-  const sectionLinks = (homeProfile?.sections || [])
-    .filter((s: any) => s.isVisible !== false)
+  // 1. Get section links - Fallback to current sections if profiles are empty
+  const activeSections = homeProfile?.sections || sections || [];
+  const sectionLinks = activeSections
+    .filter((s: any) => s.isVisible !== false && s.type)
     .map((s: any) => {
       const type = s.type === 'GET_IN_TOUCH' ? 'CONTACT' : s.type;
       const label = type.replace(/_/g, ' ');
       // Normalize ID to match the component IDs
-      const id = (s.id || type.toLowerCase()).replace(/_/g, ''); 
-      return { id, label: label.toUpperCase(), isSection: true, profileName: homeProfile?.name };
+      let id = (s.id || type.toLowerCase()).replace(/_/g, '');
+      if (id === 'hero') id = 'home';
+      if (id === 'agenda') id = 'sessions';
+      if (id === 'contact' || id === 'getintouch') id = 'contact';
+      
+      return { id, label: label.toUpperCase(), isSection: true, profileName: homeProfile?.name || 'HOME' };
     });
 
   // 2. Get profile links (other than home)
@@ -241,17 +266,19 @@ const Navbar = ({ primaryColor, isReadOnly, logo, profiles, onTabChange, section
   return (
     <nav style={{
       position: isReadOnly ? "fixed" : "sticky", 
-      top: 0, left: 0, right: 0, zIndex: 1000,
-      background: (scrolled || !isReadOnly || menuOpen) ? "#101010" : "transparent", 
-      padding: (scrolled || menuOpen) ? "5px 0" : "10px 0",
+      top: 0, left: 0, right: 0, zIndex: 9999,
+      background: (scrolled || !isReadOnly || menuOpen) ? "#101010" : "rgba(16, 16, 16, 0.8)", 
+      backdropFilter: "blur(10px)",
+      padding: (scrolled || menuOpen) ? "8px 0" : "12px 0",
       transition: "all 0.4s ease",
-      boxShadow: scrolled ? "0 2px 10px rgba(0,0,0,0.3)" : "none",
-      height: '60px',
+      boxShadow: scrolled ? "0 4px 20px rgba(0,0,0,0.4)" : "none",
+      height: (scrolled || menuOpen) ? '60px' : '72px',
       display: 'flex',
-      alignItems: 'center'
+      alignItems: 'center',
+      borderBottom: (scrolled || menuOpen) ? "none" : "1px solid rgba(255,255,255,0.05)"
     }}>
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 20px", display: "flex", alignItems: "center", justifyContent: "space-between", height: '100%', width: '100%' }}>
-        <div className="nav-logo" style={{ display: 'flex', alignItems: 'center', whiteSpace: 'nowrap', position: 'relative', gap: '10px' }}>
+        <div className="nav-logo" style={{ display: 'flex', alignItems: 'center', whiteSpace: 'nowrap', position: 'relative', gap: '10px', zIndex: 1001 }}>
           <div onClick={(e) => { 
             if (isReadOnly) { e.preventDefault(); scrollTo("home"); }
             else triggerLogoUpload();
@@ -264,9 +291,6 @@ const Navbar = ({ primaryColor, isReadOnly, logo, profiles, onTabChange, section
                   style={{ color: "#fff", fontWeight: 700, fontSize: "1.4rem", letterSpacing: '1px', outline: 'none' }}
                   contentEditable={!isReadOnly}
                   suppressContentEditableWarning
-                  onBlur={(e: any) => {
-                    // visual only
-                  }}
                   onClick={(e) => !isReadOnly && e.stopPropagation()}
                 >
                   EVENT<span style={{ color: primaryColor }}>BUILDER</span>
@@ -274,27 +298,33 @@ const Navbar = ({ primaryColor, isReadOnly, logo, profiles, onTabChange, section
               </div>
             )}
           </div>
-          {!isReadOnly && (
-            <button 
-              onClick={triggerLogoUpload}
-              style={{ background: primaryColor, color: '#fff', border: 'none', padding: '2px 6px', borderRadius: '4px', fontSize: '9px', fontWeight: 800, cursor: 'pointer' }}
-            >
-              {logo ? 'CHANGE' : 'ADD LOGO'}
-            </button>
-          )}
         </div>
 
-        <ul className="nav-links" style={{ 
+        {/* Hamburger Icon - Far Right */}
+        <button 
+          onClick={() => setMenuOpen(!menuOpen)}
+          className="mobile-hamburger"
+          style={{
+            display: 'none',
+            background: 'transparent',
+            border: 'none',
+            color: '#fff',
+            fontSize: '22px',
+            cursor: 'pointer',
+            zIndex: 1001,
+            padding: '5px'
+          }}
+        >
+          <i className={menuOpen ? "fas fa-times" : "fas fa-bars"}></i>
+        </button>
+
+        <ul className={`nav-links ${menuOpen ? 'open' : ''}`} style={{ 
           display: "flex", 
           gap: '2px', 
           listStyle: "none", 
           margin: 0, 
           padding: 0,
-          flexWrap: 'nowrap',
-          overflowX: 'auto',
-          msOverflowStyle: 'none',
-          scrollbarWidth: 'none',
-          WebkitOverflowScrolling: 'touch'
+          transition: "all 0.3s ease"
         }}>
           {navItems.map((item, idx) => (
             <li key={`${item.id}-${idx}`} style={{ flexShrink: 0 }}>
@@ -310,6 +340,7 @@ const Navbar = ({ primaryColor, isReadOnly, logo, profiles, onTabChange, section
                     scrollTo(item.id);
                   }
                 }
+                setMenuOpen(false);
               }} style={{
                 background: "transparent", border: "none", color: "#fff", fontSize: '13px',
                 fontWeight: 600, letterSpacing: "0.3px", textTransform: "uppercase",
@@ -327,17 +358,47 @@ const Navbar = ({ primaryColor, isReadOnly, logo, profiles, onTabChange, section
       </div>
 
       <style jsx>{`
-        .nav-links::-webkit-scrollbar {
-          display: none;
-        }
         @media (max-width: 768px) {
-          .nav-logo { font-size: 1.1rem !important; margin-right: 15px; }
+          .mobile-hamburger {
+            display: block !important;
+          }
           .nav-links {
-            padding-bottom: 5px !important;
+            position: absolute;
+            top: 60px;
+            right: 20px;
+            background: #1a1a1a;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: stretch;
+            gap: 0 !important;
+            transform: translateY(10px);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 1000;
+            width: 200px;
+            padding: 10px 0 !important;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+          }
+          .nav-links.open {
+            transform: translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+          }
+          .nav-links li {
+            width: 100%;
           }
           .nav-links li button {
-            padding: 5px 8px !important;
-            font-size: 12px !important;
+            font-size: 14px !important;
+            padding: 12px 20px !important;
+            width: 100%;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+          }
+          .nav-links li:last-child button {
+            border-bottom: none;
           }
         }
       `}</style>
@@ -372,45 +433,48 @@ const CountdownTimer = ({ colors }: { colors: any }) => {
     flexDirection: 'column',
     alignItems: 'center',
     background: 'rgba(255,255,255,0.1)',
-    backdropFilter: 'blur(10px)',
-    padding: '8px',
-    borderRadius: '10px',
-    minWidth: '70px',
-    border: '1px solid rgba(255,255,255,0.2)'
+    backdropFilter: 'blur(12px)',
+    padding: '16px',
+    borderRadius: '16px',
+    minWidth: '90px',
+    border: '1px solid rgba(255,255,255,0.2)',
+    boxShadow: '0 10px 30px rgba(0,0,0,0.1)'
   };
 
   const valStyle: React.CSSProperties = {
-    fontSize: '36px',
-    fontWeight: 700,
+    fontSize: '42px',
+    fontWeight: 800,
     color: colors.white,
-    lineHeight: 1
+    lineHeight: 1,
+    letterSpacing: '-1px'
   };
 
   const labelStyle: React.CSSProperties = {
-    fontSize: '10px',
-    fontWeight: 500,
+    fontSize: '11px',
+    fontWeight: 700,
     textTransform: 'uppercase',
-    letterSpacing: '1px',
+    letterSpacing: '2px',
     color: colors.primary,
-    marginTop: '2px'
+    marginTop: '8px',
+    opacity: 0.9
   };
 
   return (
-    <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '30px' }}>
+    <div className="countdown-container" style={{ display: 'flex', gap: '20px', justifyContent: 'center', marginTop: '50px' }}>
       <div style={unitStyle}>
-        <span style={valStyle}>{timeLeft.days}</span>
+        <span style={valStyle}>{String(timeLeft.days).padStart(2, '0')}</span>
         <span style={labelStyle}>Days</span>
       </div>
       <div style={unitStyle}>
-        <span style={valStyle}>{timeLeft.hours}</span>
+        <span style={valStyle}>{String(timeLeft.hours).padStart(2, '0')}</span>
         <span style={labelStyle}>Hours</span>
       </div>
       <div style={unitStyle}>
-        <span style={valStyle}>{timeLeft.minutes}</span>
-        <span style={labelStyle}>Minutes</span>
+        <span style={valStyle}>{String(timeLeft.minutes).padStart(2, '0')}</span>
+        <span style={labelStyle}>Mins</span>
       </div>
       <div style={unitStyle}>
-        <span style={valStyle}>{timeLeft.seconds}</span>
+        <span style={valStyle}>{String(timeLeft.seconds).padStart(2, '0')}</span>
         <span style={labelStyle}>Secs</span>
       </div>
     </div>
@@ -422,20 +486,21 @@ const Container = ({ children, style }: { children: React.ReactNode; style?: Rea
   <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 20px", ...style }}>{children}</div>
 );
 
-const HomeHero = ({ colors, data, onUpdate, isReadOnly }: { colors: any; data: any; onUpdate: any; isReadOnly?: boolean }) => {
+const HomeHero = ({ colors, data, onUpdate, isReadOnly, isMounted }: { colors: any; data: any; onUpdate: any; isReadOnly?: boolean; isMounted: boolean }) => {
   const slide = data?.slides?.[0] || {};
   const dt = data?.dateTimeSettings || {};
   
   const updateSlide = (field: string, value: string) => {
-    const newSlides = [...(data.slides || [{ id: 1 }])];
+    const newSlides = [...(data?.slides || [{ id: 1 }])];
     newSlides[0] = { ...newSlides[0], [field]: value };
-    onUpdate({ slides: newSlides });
+    onUpdate({ ...data, slides: newSlides });
   };
 
   return (
     <section id="home" style={{
-      background: `linear-gradient(rgba(0,0,0,0.65),rgba(0,0,0,0.65)), url('${slide.images?.[0] || 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=1600'}') center/cover no-repeat fixed`,
-      height: "75vh", display: "flex", alignItems: "center", color: colors.white, textAlign: "center", position: 'relative'
+      background: `linear-gradient(rgba(15, 23, 42, 0.4),rgba(15, 23, 42, 0.7)), url('${slide.images?.[0] || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1600'}') center/cover no-repeat fixed`,
+      height: "70vh", minHeight: "600px", display: "flex", alignItems: "center", color: colors.white, textAlign: "center", position: 'relative',
+      padding: '60px 0'
     }}>
       <Container>
         {!isReadOnly && (
@@ -459,31 +524,48 @@ const HomeHero = ({ colors, data, onUpdate, isReadOnly }: { colors: any; data: a
                 };
                 input.click();
               }}
-              style={{ background: colors.primary, color: '#fff', border: 'none', padding: '8px 15px', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', fontSize: '11px' }}
+              style={{ background: colors.primary, color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '12px', fontWeight: 700, cursor: 'pointer', fontSize: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.2)' }}
             >
               CHANGE BACKGROUND
             </button>
           </div>
         )}
+        
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)', padding: '8px 20px', borderRadius: '9999px', marginBottom: '32px', border: '1px solid rgba(255,255,255,0.2)' }}>
+          <i className="fas fa-star" style={{ color: colors.primary, fontSize: '12px' }}></i>
+          <span style={{ fontSize: '14px', fontWeight: 800, letterSpacing: '2px', textTransform: 'uppercase' }}>{slide.badge || 'Limited Seats Available'}</span>
+        </div>
+
         <EditableText 
-          tagName="h3" text={dt.eventDate ? formatDate(dt.eventDate) : 'October 15, 2026'} isReadOnly={isReadOnly}
-          onUpdate={(val: string) => onUpdate({ dateTimeSettings: { ...dt, eventDate: val } })}
-          style={{ fontSize: '14px', fontWeight: 600, letterSpacing: '3px', marginBottom: '15px', textTransform: 'uppercase', color: colors.primary }}
-        />
-        <EditableText 
-          tagName="h1" text={slide.title || 'The Global Tech Innovation Summit'} isReadOnly={isReadOnly}
+          tagName="h1" text={slide.title || 'Experience the Next Big Thing'} isReadOnly={isReadOnly}
           onUpdate={(val: string) => updateSlide('title', val)}
-          style={{ fontSize: '52px', fontWeight: 800, letterSpacing: '0.5px', marginBottom: '20px', lineHeight: '1.2', textTransform: 'uppercase' }}
-        />
-        <EditableText 
-          tagName="p" text={slide.subtitle || 'Join 500+ industry leaders for the most influential technology conference.'} isReadOnly={isReadOnly}
-          onUpdate={(val: string) => updateSlide('subtitle', val)}
-          style={{ fontSize: '16px', maxWidth: '700px', margin: '0 auto 30px', color: '#eee', lineHeight: '1.5' }}
+          style={{ fontSize: 'clamp(48px, 6vw, 84px)', fontWeight: 800, letterSpacing: '-2px', marginBottom: '24px', lineHeight: '1.05', textTransform: 'uppercase', textShadow: '0 10px 30px rgba(0,0,0,0.3)' }}
         />
         
-        <div style={{ display: "flex", gap: '15px', justifyContent: "center", marginBottom: '30px' }}>
-          <button style={{ ...btnBase, background: colors.primary, borderColor: colors.primary, color: "#fff", padding: '12px 30px' }}>SECURE YOUR SEAT</button>
-          <button style={{ ...btnBase, background: "transparent", color: "#fff", padding: '12px 30px' }}>VIEW SCHEDULE</button>
+        <EditableText 
+          tagName="p" text={slide.subtitle || 'Join industry leaders and innovators for a three-day journey through the future of technology and networking.'} isReadOnly={isReadOnly}
+          onUpdate={(val: string) => updateSlide('subtitle', val)}
+          style={{ fontSize: '22px', maxWidth: '850px', margin: '0 auto 48px', color: 'rgba(255,255,255,0.9)', lineHeight: '1.6', fontWeight: 400 }}
+        />
+        
+        <div style={{ display: "flex", gap: '20px', justifyContent: "center", marginBottom: '60px', flexWrap: 'wrap' }}>
+          <button style={{ ...btnBase, background: colors.primary, borderColor: colors.primary, color: "#fff", padding: '18px 48px', boxShadow: `0 10px 25px ${colors.primary}40`, borderRadius: '14px' }}>REGISTER NOW</button>
+          <button style={{ ...btnBase, background: "rgba(255,255,255,0.1)", backdropFilter: 'blur(10px)', color: "#fff", padding: '18px 48px', border: '2px solid rgba(255,255,255,0.3)', borderRadius: '14px' }}>VIEW AGENDA</button>
+        </div>
+
+        <div style={{ display: 'flex', gap: '40px', justifyContent: 'center', flexWrap: 'wrap', color: '#fff', opacity: 0.8, marginBottom: '60px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontWeight: 600 }}>
+             <i className="fas fa-calendar" style={{ color: colors.primary }}></i>
+             <span>{dt.eventDate ? (isMounted ? formatDate(dt.eventDate) : 'Oct 15, 2026') : 'Oct 15, 2026'}</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontWeight: 600 }}>
+             <i className="fas fa-clock" style={{ color: colors.primary }}></i>
+             <span>{dt.eventDate ? (isMounted ? new Date(dt.eventDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '06:00 PM') : '06:00 PM'}</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontWeight: 600 }}>
+             <i className="fas fa-map-marker-alt" style={{ color: colors.primary }}></i>
+             <span>{dt.venueText || 'Grand Convention Center, SF'}</span>
+          </div>
         </div>
 
         <CountdownTimer colors={colors} />
@@ -506,7 +588,7 @@ const WhyAttend = ({ colors, data, onUpdate, isReadOnly }: { colors: any; data: 
   };
 
   return (
-    <section id="whyattend" style={{ padding: "60px 0", background: colors.white }}>
+    <section id="whyattend" style={{ padding: "40px 0", background: colors.white }}>
       <Container>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: '60px', alignItems: "center" }}>
           <div>
@@ -583,7 +665,7 @@ const Speakers = ({ colors, data, onUpdate, isReadOnly }: { colors: any; data: a
   };
 
   return (
-    <section id="speakers" style={{ background: colors.lightBg, padding: "60px 0", textAlign: "center" }}>
+    <section id="speakers" style={{ background: colors.lightBg, padding: "40px 0", textAlign: "center" }}>
       <Container>
         <h3 style={{ color: colors.primary, fontSize: '13px', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '10px' }}>Meet Our Experts</h3>
         <EditableText 
@@ -644,7 +726,7 @@ const Sessions = ({ colors, data, onUpdate, isReadOnly }: { colors: any; data: a
   };
 
   return (
-    <section id="sessions" style={{ padding: "60px 0", background: colors.white }}>
+    <section id="sessions" style={{ padding: "40px 0", background: colors.white }}>
       <Container>
         <h3 style={{ color: colors.primary, fontSize: '13px', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '10px', textAlign: 'center' }}>Event Schedule</h3>
         <EditableText 
@@ -698,7 +780,8 @@ const Venue = ({ colors, data, onUpdate, isReadOnly }: { colors: any; data: any;
   
   return (
     <section id="venue" style={{
-      padding: "60px 0", color: colors.white,
+      padding: "20px 0"
+, color: colors.white,
       background: bgImg ? `linear-gradient(rgba(0,0,0,0.7),rgba(0,0,0,0.7)), url('${bgImg}') center/cover no-repeat fixed` : colors.dark,
       position: 'relative'
     }}>
@@ -788,7 +871,7 @@ const Gallery = ({ colors, data, onUpdate, isReadOnly }: { colors: any; data: an
   };
 
   return (
-    <section id="gallery" style={{ padding: "60px 0", background: colors.lightBg }}>
+    <section id="gallery" style={{ padding: "40px 0", background: colors.lightBg }}>
       <Container>
         <h3 style={{ color: colors.primary, fontSize: '14px', fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '15px', textAlign: 'center' }}>Moments</h3>
         <h2 style={{ fontSize: '36px', fontWeight: 800, textTransform: "uppercase", textAlign: "center", marginBottom: '40px', color: colors.dark2 }}>Event Gallery</h2>
@@ -814,7 +897,8 @@ const Contact = ({ colors, data, onUpdate, isReadOnly }: { colors: any; data: an
 
   return (
     <section id="contact" style={{ 
-      padding: "60px 0", 
+      padding: "20px 0"
+, 
       background: bgImg ? `linear-gradient(rgba(0,0,0,0.7),rgba(0,0,0,0.7)), url('${bgImg}') center/cover no-repeat fixed` : colors.navbar, 
       color: colors.navbarText,
       position: 'relative'
@@ -930,10 +1014,16 @@ export default function ThemeOne({
   onMoveUp,
   onMoveDown,
   onDelete,
-  onAddClick
+  onAddClick,
+  forceMobile
 }: ThemeOneProps) {
   const colors = getColors(themeConfig);
   const [settingsSection, setSettingsSection] = useState<{ id: string, type: string, data: any } | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const renderThemeSection = (section: any, index: number) => {
     const isFirst = index === 0;
@@ -968,7 +1058,6 @@ export default function ThemeOne({
       case 'FLOOR_PLAN': SectionComponent = FloorPlanSection; isThemed = false; break;
       case 'CUSTOM_HTML': SectionComponent = CustomHTMLSection; isThemed = false; break;
       default: 
-        // Default fallback for any other type to ensure it's visible and editable
         SectionComponent = TextSection; 
         isThemed = false;
         break;
@@ -978,7 +1067,12 @@ export default function ThemeOne({
       return (
         <SectionComponent 
           key={section.id || index}
-          {...{ index, isReadOnly, onMoveUp, onMoveDown, onDelete, onAddClick, isFirst, isLast }}
+          {...{ index, isReadOnly, isFirst, isLast }}
+          onMoveUp={() => onMoveUp?.(index)}
+          onMoveDown={() => onMoveDown?.(index)}
+          onDelete={() => onDelete?.(index)}
+          onAddSection={() => onAddClick?.(index)}
+          onAddSectionBelow={() => onAddClick?.(index + 1)}
           data={section.data}
           updateData={(newData: any) => onUpdateSection?.(section.id, newData)}
           themeConfig={{
@@ -1002,30 +1096,29 @@ export default function ThemeOne({
         onSettingsClick={() => setSettingsSection({ ...section, type: settingsMode })}
         isFirst={isFirst}
         isLast={isLast}
+        forceMobile={forceMobile}
       >
-        <div className="editable-element" style={{ position: 'relative' }}>
-          {!isReadOnly && (
-            <div style={{ position: 'absolute', top: '20px', right: '40px', zIndex: 100 }}>
-              <EditToolbar onSettingsClick={() => setSettingsSection({ ...section, type: settingsMode })} />
-            </div>
-          )}
-          <SectionComponent 
-            colors={colors}
-            data={section.data}
-            isReadOnly={isReadOnly}
-            onUpdate={(newData: any) => onUpdateSection?.(section.id, newData)}
-          />
-        </div>
+        <SectionComponent 
+          colors={colors}
+          data={section.data}
+          isReadOnly={isReadOnly}
+          isMounted={isMounted}
+          onUpdate={(newData: any) => onUpdateSection?.(section.id, newData)}
+        />
       </ThemeSectionWrapper>
     );
   };
 
   return (
-    <div style={{ 
-      fontFamily: themeConfig?.fontFamily || "'Inter', sans-serif", 
-      background: colors.white, 
-      scrollBehavior: 'smooth' 
-    }}>
+    <div 
+      className={forceMobile ? "is-mobile-preview" : ""}
+      style={{ 
+        fontFamily: themeConfig?.fontFamily || "'Inter', sans-serif", 
+        background: colors.white, 
+        scrollBehavior: 'smooth',
+        '--primary': colors.primary
+      } as any}
+    >
       {/* Font Injections */}
       <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=Montserrat:wght@400;700&family=Roboto:wght@400;700&family=Poppins:wght@400;700&family=Lora:wght@400;700&family=Merriweather:wght@400;700&family=Open+Sans:wght@400;700&family=Lato:wght@400;700&family=Oswald:wght@400;700&family=Raleway:wght@400;700&family=Nunito:wght@400;700&family=Ubuntu:wght@400;700&family=PT+Serif:wght@400;700&family=Bebas+Neue&family=Dancing+Script:wght@400;700&family=Pacifico&display=swap" rel="stylesheet" />
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
@@ -1092,12 +1185,121 @@ export default function ThemeOne({
 
         /* ThemeOne Mobile Responsiveness */
         @media (max-width: 768px) {
-          h1 { font-size: 42px !important; }
-          h2 { font-size: 32px !important; }
-          section { padding: 60px 0 !important; }
-          .hero-section { height: auto !important; min-height: 100vh; padding: 120px 0 !important; }
-          .nav-links { display: none !important; }
+          .mobile-hamburger {
+            display: block !important;
+          }
+          .nav-links {
+            position: absolute;
+            top: 60px;
+            left: 20px;
+            background: #101010;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: stretch;
+            gap: 0 !important;
+            transform: translateY(10px);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 1000;
+            width: 220px;
+            padding: 10px 0 !important;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+          }
+          .nav-links.open {
+            transform: translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+          }
+          .nav-links li {
+            width: 100%;
+          }
+          .nav-links li button {
+            font-size: 14px !important;
+            padding: 12px 20px !important;
+            width: 100%;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+          }
+          .nav-links li:last-child button {
+            border-bottom: none;
+          }
+
+          .countdown-container {
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: nowrap !important;
+            gap: 10px !important;
+            justify-content: center !important;
+          }
+          .countdown-container div[style*="min-width: 90px"] {
+            min-width: 65px !important;
+            padding: 8px !important;
+            border-radius: 12px !important;
+          }
+          .countdown-container span[style*="font-size: 42px"] {
+            font-size: 24px !important;
+          }
+          .countdown-container span[style*="font-size: 11px"] {
+            font-size: 9px !important;
+          }
+          .opacity-0.group-hover\\:opacity-100 {
+            opacity: 1 !important;
+            visibility: visible !important;
+          }
+          .pointer-events-none {
+            pointer-events: auto !important;
+          }
+          .section-control-btn {
+            background-color: #0f172a !important;
+            color: white !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
+            border-color: rgba(255,255,255,0.1) !important;
+          }
+          .section-control-btn i {
+            color: white !important;
+          }
           
+          h1 { font-size: 36px !important; line-height: 1.2 !important; text-align: center !important; }
+          h2 { font-size: 28px !important; text-align: center !important; }
+          h3 { font-size: 18px !important; text-align: center !important; }
+          p { font-size: 16px !important; text-align: center !important; line-height: 1.5 !important; }
+          section { padding: 60px 0 !important; }
+          
+          /* Hero Section Adjustments */
+          #home { 
+            height: auto !important; 
+            min-height: 100vh !important; 
+            padding: 120px 20px 60px !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: center !important;
+            align-items: center !important;
+          }
+
+          #home div[style*="display: flex"][style*="gap: 20px"] {
+            flex-direction: column !important;
+            align-items: center !important;
+            width: 100% !important;
+          }
+
+          #home button {
+            width: 100% !important;
+            max-width: 300px !important;
+            margin: 0 auto !important;
+          }
+
+          #home div[style*="display: flex"][style*="gap: 40px"] {
+            flex-direction: row !important;
+            flex-wrap: wrap !important;
+            gap: 20px !important;
+            justify-content: center !important;
+            align-items: center !important;
+          }
+
           /* Why Attend Grid */
           #whyattend > div > div {
             grid-template-columns: 1fr !important;
@@ -1105,6 +1307,11 @@ export default function ThemeOne({
           }
           #whyattend > div > div > div:last-child {
             order: -1;
+          }
+
+          /* Speakers Grid */
+          #speakers .speaker-card {
+            max-width: 100% !important;
           }
 
           /* Sessions Flex */
@@ -1125,9 +1332,15 @@ export default function ThemeOne({
           /* Venue Grid */
           #venue > div > div:last-child {
             grid-template-columns: 1fr !important;
+            padding: 15px !important;
           }
-          .venue-hero-img {
-            height: 350px !important;
+          #venue div[style*="grid-template-columns"] {
+            grid-template-columns: 1fr !important;
+          }
+
+          /* Gallery Grid */
+          #gallery div[style*="grid-template-columns"] {
+            grid-template-columns: 1fr 1fr !important;
           }
 
           /* Contact Grid */
@@ -1135,12 +1348,144 @@ export default function ThemeOne({
             grid-template-columns: 1fr !important;
             gap: 40px !important;
           }
+
+          /* General spacing for chips and buttons */
+          div[style*="display: flex"][style*="gap: 40px"],
+          div[style*="display: flex"][style*="gap: 20px"] {
+            gap: 15px !important;
+            justify-content: center !important;
+          }
+
+          .countdown-container div[style*="min-width: 90px"] {
+            min-width: 70px !important;
+            padding: 10px !important;
+          }
+
+          .countdown-container span[style*="font-size: 42px"] {
+            font-size: 28px !important;
+          }
+        }
+
+        /* Support for Mobile Preview in Editor Frame */
+        .is-mobile-preview .opacity-0.group-hover\\:opacity-100 {
+          opacity: 1 !important;
+          visibility: visible !important;
+        }
+        .is-mobile-preview .pointer-events-none {
+          pointer-events: auto !important;
+        }
+        .is-mobile-preview .section-control-btn {
+          background-color: #0f172a !important;
+          color: white !important;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
+          border-color: rgba(255,255,255,0.1) !important;
+        }
+        .is-mobile-preview .section-control-btn i {
+          color: white !important;
+        }
+        
+        .is-mobile-preview h1 { font-size: 36px !important; line-height: 1.2 !important; text-align: center !important; }
+        .is-mobile-preview h2 { font-size: 28px !important; text-align: center !important; }
+        .is-mobile-preview h3 { font-size: 18px !important; text-align: center !important; }
+        .is-mobile-preview p { font-size: 16px !important; text-align: center !important; line-height: 1.5 !important; }
+        .is-mobile-preview section { padding: 60px 0 !important; }
+        
+        .is-mobile-preview #home { 
+          height: auto !important; 
+          min-height: 100vh !important; 
+          padding: 120px 20px 60px !important;
+          display: flex !important;
+          flex-direction: column !important;
+          justify-content: center !important;
+          align-items: center !important;
+        }
+
+        .is-mobile-preview #home div[style*="display: flex"][style*="gap: 20px"] {
+          flex-direction: column !important;
+          align-items: center !important;
+          width: 100% !important;
+        }
+
+        .is-mobile-preview #home button {
+          width: 100% !important;
+          max-width: 300px !important;
+          margin: 0 auto !important;
+        }
+
+        .is-mobile-preview #home div[style*="display: flex"][style*="gap: 40px"] {
+          flex-direction: row !important;
+          flex-wrap: wrap !important;
+          gap: 20px !important;
+          justify-content: center !important;
+          align-items: center !important;
+        }
+
+        .is-mobile-preview #whyattend > div > div {
+          grid-template-columns: 1fr !important;
+          gap: 40px !important;
+        }
+        .is-mobile-preview #whyattend > div > div > div:last-child {
+          order: -1;
+        }
+
+        .is-mobile-preview #speakers .speaker-card {
+          max-width: 100% !important;
+        }
+
+        .is-mobile-preview .session-item {
+          flex-direction: column !important;
+          gap: 20px !important;
+          padding: 30px !important;
+        }
+        .is-mobile-preview .session-item > div:first-child {
+          width: 100% !important;
+          border-right: none !important;
+          border-bottom: 2px solid ${colors.primary};
+          padding-right: 0 !important;
+          padding-bottom: 20px !important;
+          text-align: left !important;
+        }
+
+        .is-mobile-preview #venue > div > div:last-child {
+          grid-template-columns: 1fr !important;
+          padding: 15px !important;
+        }
+        .is-mobile-preview #venue div[style*="grid-template-columns"] {
+          grid-template-columns: 1fr !important;
+        }
+
+        .is-mobile-preview #gallery div[style*="grid-template-columns"] {
+          grid-template-columns: 1fr 1fr !important;
+        }
+
+        .is-mobile-preview #contact > div > div {
+          grid-template-columns: 1fr !important;
+          gap: 40px !important;
+        }
+
+        .is-mobile-preview div[style*="display: flex"][style*="gap: 40px"],
+        .is-mobile-preview div[style*="display: flex"][style*="gap: 20px"] {
+          gap: 15px !important;
+          justify-content: center !important;
+        }
+
+        .is-mobile-preview .countdown-container div[style*="min-width: 90px"] {
+          min-width: 70px !important;
+          padding: 10px !important;
+        }
+
+        .is-mobile-preview .countdown-container span[style*="font-size: 42px"] {
+          font-size: 28px !important;
+        }
+
+        @media (max-width: 480px) {
+           h1 { font-size: 32px !important; }
+           #gallery div[style*="grid-template-columns"] {
+            grid-template-columns: 1fr !important;
+          }
         }
       `}</style>
     </div>
   );
 }
 
-const socialStyle: React.CSSProperties = {
-  display: 'inline-flex', width: '40px', height: '40px', background: '#f1f5f9', borderRadius: '50%', alignItems: 'center', justifyContent: 'center', margin: '0 8px', color: '#64748b', textDecoration: 'none', transition: '0.3s'
-};

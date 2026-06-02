@@ -39,6 +39,7 @@ interface ThemeTwoProps {
   onMoveDown?: (index: number) => void;
   onDelete?: (index: number) => void;
   onAddClick?: (index: number | null) => void;
+  forceMobile?: boolean;
 }
 
 // ─── Editable Components ───────────────────────────────────────────────────
@@ -52,37 +53,56 @@ const ThemeSectionWrapper = ({
   onAddClick,
   onSettingsClick,
   isFirst,
-  isLast 
+  isLast,
+  forceMobile
 }: any) => {
   if (isReadOnly) return <>{children}</>;
 
+  const showControlsClass = forceMobile ? "opacity-100" : "opacity-0 group-hover:opacity-100";
+
   return (
-    <div className="group relative">
-      <div className="absolute left-4 top-1/2 -translate-y-1/2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all z-[100]">
+    <div className={`group relative border-y-2 border-transparent hover:border-indigo-500/50 transition-all duration-300 my-2 ${forceMobile ? 'is-mobile-editor' : ''}`}>
+      {/* Add Section Button Above */}
+      {isFirst && (
+        <div className={`absolute top-0 left-0 right-0 -translate-y-1/2 flex items-center justify-center transition-all z-[9999] h-10 pointer-events-none ${showControlsClass}`}>
+          <button 
+            onClick={() => onAddClick(index)}
+            className="bg-indigo-600 text-white px-5 py-2 rounded-full flex items-center gap-2 shadow-[0_0_20px_rgba(79,70,229,0.4)] hover:scale-110 hover:bg-indigo-700 transition-all cursor-pointer font-bold text-xs pointer-events-auto border-2 border-white section-control-btn"
+          >
+            <i className="fas fa-plus"></i> Add Section
+          </button>
+        </div>
+      )}
+
+      {/* Side Controls */}
+      <div className={`absolute right-6 top-6 flex flex-col gap-2 transition-all z-[999] ${showControlsClass}`}>
         {!isFirst && (
-          <button onClick={() => onMoveUp(index)} className="w-8 h-8 bg-white shadow-lg rounded-full flex items-center justify-center hover:bg-blue-50 text-slate-600">
+          <button onClick={() => onMoveUp(index)} className="w-10 h-10 bg-white shadow-xl rounded-xl flex items-center justify-center hover:bg-indigo-50 text-slate-700 border border-slate-100 transition-colors section-control-btn">
             <i className="fas fa-arrow-up text-xs"></i>
           </button>
         )}
         {!isLast && (
-          <button onClick={() => onMoveDown(index)} className="w-8 h-8 bg-white shadow-lg rounded-full flex items-center justify-center hover:bg-blue-50 text-slate-600">
+          <button onClick={() => onMoveDown(index)} className="w-10 h-10 bg-white shadow-xl rounded-xl flex items-center justify-center hover:bg-indigo-50 text-slate-700 border border-slate-100 transition-colors section-control-btn">
             <i className="fas fa-arrow-down text-xs"></i>
           </button>
         )}
-        <button onClick={() => onSettingsClick()} className="w-8 h-8 bg-white shadow-lg rounded-full flex items-center justify-center hover:bg-blue-50 text-slate-600">
+        <button onClick={() => onSettingsClick()} className="w-10 h-10 bg-white shadow-xl rounded-xl flex items-center justify-center hover:bg-indigo-50 text-slate-700 border border-slate-100 transition-colors section-control-btn">
           <i className="fas fa-cog text-xs"></i>
         </button>
-        <button onClick={() => onDelete(index)} className="w-8 h-8 bg-white shadow-lg rounded-full flex items-center justify-center hover:bg-red-50 text-red-500">
+        <button onClick={() => onDelete(index)} className="w-10 h-10 bg-white shadow-xl rounded-xl flex items-center justify-center hover:bg-red-50 text-red-500 border border-red-50 transition-colors section-control-btn">
           <i className="fas fa-trash-alt text-xs"></i>
         </button>
       </div>
+
       {children}
-      <div className="h-4 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
+
+      {/* Add Section Button Below */}
+      <div className={`absolute bottom-0 left-0 right-0 translate-y-1/2 flex items-center justify-center transition-all z-[9999] h-10 pointer-events-none ${showControlsClass}`}>
         <button 
           onClick={() => onAddClick(index + 1)}
-          className="bg-indigo-600 text-white w-6 h-6 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
+          className="bg-indigo-600 text-white px-5 py-2 rounded-full flex items-center gap-2 shadow-[0_0_20px_rgba(79,70,229,0.4)] hover:scale-110 hover:bg-indigo-700 transition-all cursor-pointer font-bold text-xs pointer-events-auto border-2 border-white section-control-btn"
         >
-          <i className="fas fa-plus text-[10px]"></i>
+          <i className="fas fa-plus"></i> Add Section
         </button>
       </div>
     </div>
@@ -277,14 +297,20 @@ const Navbar = ({ colors, isReadOnly, logo, profiles, onTabChange, sections, onU
   const isCurrentlyHome = sections && homeProfile && sections === homeProfile.sections;
 
   // 1. Always get section links from the HOME profile for consistency
-  const sectionLinks = (homeProfile?.sections || [])
-    .filter((s: any) => s.isVisible !== false)
+  const activeSections = homeProfile?.sections || sections || [];
+  const sectionLinks = activeSections
+    .filter((s: any) => s.isVisible !== false && s.type)
     .map((s: any) => {
       const type = s.type === 'GET_IN_TOUCH' ? 'CONTACT' : s.type;
       const label = type.replace(/_/g, ' ');
       // Normalize ID to match the component IDs
-      const id = (s.id || type.toLowerCase()).replace(/_/g, '').replace('schedule', 'sessions').replace('about', 'whyattend'); 
-      return { id, label: label.toUpperCase(), isSection: true, profileName: homeProfile?.name };
+      let id = (s.id || type.toLowerCase()).replace(/_/g, '');
+      if (id === 'hero') id = 'home';
+      if (id === 'sessions' || id === 'agenda') id = 'schedule';
+      if (id === 'whyattend') id = 'about';
+      if (id === 'contact' || id === 'getintouch') id = 'contact';
+
+      return { id, label: label.toUpperCase(), isSection: true, profileName: homeProfile?.name || 'HOME' };
     });
 
   // 2. Get profile links (other than home)
@@ -297,20 +323,29 @@ const Navbar = ({ colors, isReadOnly, logo, profiles, onTabChange, sections, onU
   const navItems = [...sectionLinks, ...otherPageLinks];
 
   return (
-    <nav style={{
-      position: isReadOnly ? "fixed" : "sticky", 
-      top: 0, left: 0, right: 0, zIndex: 1000,
-      background: (scrolled || !isReadOnly || menuOpen) ? colors.navbar : "transparent",
-      backdropFilter: "blur(20px)",
-      padding: (scrolled || menuOpen) ? "12px 0" : "20px 0",
-      transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-      borderBottom: (scrolled || !isReadOnly || menuOpen) ? `1px solid ${colors.border}` : "none",
-      boxShadow: scrolled ? "0 4px 30px rgba(0,0,0,0.03)" : "none"
-    }}>
-      <div style={{ maxWidth: 1400, margin: "0 auto", padding: "0 40px", display: "flex", alignItems: "center", justifyContent: "space-between", height: '100%' }}>
+    <nav 
+      className="theme-navbar"
+      style={{
+        position: isReadOnly ? "fixed" : "sticky", 
+        top: 0, left: 0, right: 0, zIndex: 9999,
+        background: (scrolled || !isReadOnly || menuOpen) ? colors.navbar : "transparent",
+        backdropFilter: "blur(20px)",
+        padding: (scrolled || menuOpen) ? "8px 0" : "12px 0",
+        transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+        borderBottom: (scrolled || !isReadOnly || menuOpen) ? `1px solid ${colors.border}` : "none",
+        boxShadow: scrolled ? "0 4px 30px rgba(0,0,0,0.03)" : "none",
+        height: (scrolled || menuOpen) ? '60px' : '72px',
+        display: 'flex',
+        alignItems: 'center'
+      }}
+    >
+      <div 
+        className="nav-container"
+        style={{ maxWidth: 1400, margin: "0 auto", padding: "0 40px", display: "flex", alignItems: "center", justifyContent: "space-between", height: '100%', width: '100%' }}
+      >
         <div 
           className="nav-logo" 
-          style={{ display: 'flex', alignItems: 'center', whiteSpace: 'nowrap', position: 'relative', gap: '15px' }}
+          style={{ display: 'flex', alignItems: 'center', whiteSpace: 'nowrap', position: 'relative', gap: '15px', zIndex: 1001 }}
         >
           <div onClick={(e) => { 
             if (isReadOnly) { e.preventDefault(); 
@@ -332,17 +367,9 @@ const Navbar = ({ colors, isReadOnly, logo, profiles, onTabChange, sections, onU
               </div>
             )}
           </div>
-          {!isReadOnly && (
-            <button 
-              onClick={triggerLogoUpload}
-              style={{ background: colors.primary, color: '#fff', border: 'none', padding: '4px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 800, cursor: 'pointer' }}
-            >
-              {logo ? 'CHANGE' : 'ADD LOGO'}
-            </button>
-          )}
         </div>
 
-        {/* Hamburger Icon */}
+        {/* Hamburger Icon - Far Right */}
         <button 
           onClick={() => setMenuOpen(!menuOpen)}
           style={{
@@ -350,16 +377,24 @@ const Navbar = ({ colors, isReadOnly, logo, profiles, onTabChange, sections, onU
             background: 'transparent',
             border: 'none',
             color: (scrolled || !isReadOnly || menuOpen) ? colors.navbarText : colors.text,
-            fontSize: '24px',
+            fontSize: '22px',
             cursor: 'pointer',
-            padding: '5px'
+            padding: '5px',
+            zIndex: 1001
           }}
           className="mobile-menu-btn"
         >
           <i className={menuOpen ? "fas fa-times" : "fas fa-bars"}></i>
         </button>
 
-        <ul className={`nav-links ${menuOpen ? 'open' : ''}`} style={{ display: "flex", gap: '40px', listStyle: "none", margin: 0, padding: 0 }}>
+        <ul className={`nav-links ${menuOpen ? 'open' : ''}`} style={{ 
+          display: "flex", 
+          gap: '40px', 
+          listStyle: "none", 
+          margin: 0, 
+          padding: 0,
+          transition: 'all 0.3s ease'
+        }}>
           {navItems.map((item, idx) => (
             <li key={`${item.id}-${idx}`}>
               <button onClick={() => {
@@ -395,28 +430,48 @@ const Navbar = ({ colors, isReadOnly, logo, profiles, onTabChange, sections, onU
           .nav-logo { font-size: 1.3rem !important; }
           .mobile-menu-btn { display: block !important; }
           .nav-links {
-            display: none !important;
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: ${colors.navbar};
-            backdrop-filter: blur(20px);
-            flex-direction: column;
+            position: absolute !important;
+            top: 70px !important;
+            right: 20px !important;
+            left: auto !important;
+            bottom: auto !important;
+            background: ${colors.navbar} !important;
+            backdrop-filter: blur(20px) !important;
+            flex-direction: column !important;
+            justify-content: flex-start !important;
+            align-items: stretch !important;
             gap: 0 !important;
-            padding: 20px 0;
-            border-top: 1px solid ${colors.border};
+            padding: 10px 0 !important;
+            width: 220px !important;
+            border-radius: 16px !important;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15) !important;
+            border: 1px solid ${colors.border} !important;
+            transform: translateY(10px);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 1000;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
           }
           .nav-links.open {
             display: flex !important;
+            transform: translateY(0);
+            opacity: 1;
+            pointer-events: auto;
           }
           .nav-links li {
             width: 100%;
           }
           .nav-links li button {
             width: 100%;
-            padding: 20px 0 !important;
-            text-align: center;
+            padding: 12px 24px !important;
+            text-align: left !important;
+            font-size: 14px !important;
+            color: ${colors.navbarText} !important;
+            border-bottom: 1px solid ${colors.border} !important;
+            letter-spacing: 1px !important;
+          }
+          .nav-links li:last-child button {
+            border-bottom: none !important;
           }
         }
       `}</style>
@@ -429,7 +484,7 @@ const Container = ({ children, style }: { children: React.ReactNode; style?: Rea
   <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 30px", ...style }}>{children}</div>
 );
 
-const Hero = ({ colors, data, onUpdate, isReadOnly }: { colors: any; data: any; onUpdate: any; isReadOnly?: boolean }) => {
+const Hero = ({ colors, data, onUpdate, isReadOnly, isMounted }: { colors: any; data: any; onUpdate: any; isReadOnly?: boolean; isMounted: boolean }) => {
   const heroImage = data?.slides?.[0]?.images?.[0] || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1600';
   
   const formatDate = (dateStr: string) => {
@@ -446,7 +501,7 @@ const Hero = ({ colors, data, onUpdate, isReadOnly }: { colors: any; data: any; 
   return (
     <section id="home" className="hero-section" style={{
       background: colors.background,
-      minHeight: "100vh", display: "flex", position: 'relative', overflow: 'hidden',
+      minHeight: "70vh", display: "flex", position: 'relative', overflow: 'hidden',
     }}>
       {/* Subtle Background Pattern for text area */}
       <div className="hero-pattern" style={{ 
@@ -455,17 +510,18 @@ const Hero = ({ colors, data, onUpdate, isReadOnly }: { colors: any; data: any; 
         backgroundSize: '48px 48px', opacity: 0.6, zIndex: 0
       }} />
 
-      <div className="hero-flex" style={{ display: 'flex', width: '100%', alignItems: 'stretch', minHeight: '100vh' }}>
+      <div className="hero-flex" style={{ display: 'flex', width: '100%', alignItems: 'stretch', minHeight: '70vh' }}>
         {/* Left Side: Content - Perfect 50% Balance */}
         <div className="hero-content-wrapper" style={{ flex: '1', display: 'flex', alignItems: 'center', padding: '100px 5% 100px 8%', position: 'relative', zIndex: 1 }}>
           <div style={{ width: '100%' }}>
             <div className="hero-date-badge" style={{ display: 'flex', alignItems: 'center', gap: '24px', marginBottom: '48px' }}>
                <span style={{ width: '64px', height: '1.5px', background: colors.primary }}></span>
                <EditableText 
-                 tagName="span" text={formatDate(data?.dateTimeSettings?.eventDate) || 'October 24 - 26, 2026'} isReadOnly={isReadOnly}
+                 tagName="span" text={isMounted ? (formatDate(data?.dateTimeSettings?.eventDate) || 'October 24 - 26, 2026') : 'October 24 - 26, 2026'} isReadOnly={isReadOnly}
                  onUpdate={(val: string) => onUpdate({ dateTimeSettings: { ...data.dateTimeSettings, eventDate: val } })}
-                 style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '6px', textTransform: 'uppercase', color: colors.primary }}
+                 style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '6px', textTransform: 'uppercase', color: colors.primary, whiteSpace: 'nowrap' }}
                />
+               <span style={{ width: '64px', height: '1.5px', background: colors.primary }}></span>
             </div>
             
             <EditableText 
@@ -492,7 +548,7 @@ const Hero = ({ colors, data, onUpdate, isReadOnly }: { colors: any; data: any; 
               }}
             />
             
-            <div style={{ display: "flex", gap: '32px', alignItems: 'center' }}>
+            <div className="hero-cta-group" style={{ display: "flex", gap: '32px', alignItems: 'center' }}>
               <EditableButton 
                 label={data?.slides?.[0]?.button?.label || 'Secure Your Invitation'} 
                 link={data?.slides?.[0]?.button?.link}
@@ -546,7 +602,7 @@ const About = ({ colors, data, onUpdate, isReadOnly }: any) => {
     { title: 'Strategic Growth', desc: 'Identify new opportunities for expansion.' }
   ];
 
-  const vPadding = data?.verticalPadding !== undefined ? `${data.verticalPadding}px` : '160px';
+  const vPadding = data?.verticalPadding !== undefined ? `${data.verticalPadding}px` : '40px';
 
   return (
     <section id="about" style={{ padding: `${vPadding} 0`, background: colors.white }}>
@@ -617,7 +673,7 @@ const Speakers = ({ colors, data, onUpdate, isReadOnly }: any) => {
     { name: 'Michael Chen', role: 'Lead Architect, Google', image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400' }
   ];
 
-  const vPadding = data?.verticalPadding !== undefined ? `${data.verticalPadding}px` : '160px';
+  const vPadding = data?.verticalPadding !== undefined ? `${data.verticalPadding}px` : '40px';
 
   const updateSpeaker = (idx: number, field: string, value: string) => {
     const newItems = [...items];
@@ -728,7 +784,7 @@ const premiumSocialBtn: React.CSSProperties = {
 
 const Schedule = ({ colors, data, onUpdate, isReadOnly }: any) => {
   const items = data?.items || [];
-  const vPadding = data?.verticalPadding !== undefined ? `${data.verticalPadding}px` : '180px';
+  const vPadding = data?.verticalPadding !== undefined ? `${data.verticalPadding}px` : '100px';
 
   const updateEvent = (idx: number, field: string, value: string) => {
     const newItems = [...items];
@@ -814,7 +870,7 @@ const Gallery = ({ colors, data, onUpdate, isReadOnly }: any) => {
     { image: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800' }
   ];
 
-  const vPadding = data?.verticalPadding !== undefined ? `${data.verticalPadding}px` : '160px';
+  const vPadding = data?.verticalPadding !== undefined ? `${data.verticalPadding}px` : '40px';
 
   return (
     <section id="gallery" style={{ padding: `${vPadding} 0`, background: colors.background }}>
@@ -847,7 +903,7 @@ const Gallery = ({ colors, data, onUpdate, isReadOnly }: any) => {
 
 const Venue = ({ colors, data, onUpdate, isReadOnly }: any) => {
   const bgImg = data?.backgroundImage || '';
-  const vPadding = data?.verticalPadding !== undefined ? `${data.verticalPadding}px` : '160px';
+  const vPadding = data?.verticalPadding !== undefined ? `${data.verticalPadding}px` : '40px';
 
   return (
     <section id="venue" style={{ 
@@ -885,7 +941,7 @@ const Venue = ({ colors, data, onUpdate, isReadOnly }: any) => {
            <div style={{ width: '60px', height: '2px', background: colors.primary, margin: '0 auto' }}></div>
         </div>
 
-      <div style={{ borderRadius: '60px', overflow: 'hidden', position: 'relative', height: '750px', boxShadow: '0 50px 100px rgba(0,0,0,0.15)', border: `1px solid ${colors.border}` }}>
+      <div className="venue-container" style={{ borderRadius: '60px', overflow: 'hidden', position: 'relative', height: '750px', boxShadow: '0 50px 100px rgba(0,0,0,0.15)', border: `1px solid ${colors.border}` }}>
         <EditableImage 
           src={data?.image || "https://images.unsplash.com/photo-1497366216548-37526070297c?w=1600"} isReadOnly={isReadOnly}
           onUpdate={(val: string) => onUpdate({ ...data, image: val })}
@@ -893,7 +949,7 @@ const Venue = ({ colors, data, onUpdate, isReadOnly }: any) => {
         />
         
         {/* Floating Glassmorphism Info Panel */}
-        <div style={{ 
+        <div className="venue-info-panel" style={{ 
           position: 'absolute', bottom: '60px', left: '60px', 
           background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(40px)', 
           padding: '60px', borderRadius: '48px', maxWidth: '520px', 
@@ -915,7 +971,7 @@ const Venue = ({ colors, data, onUpdate, isReadOnly }: any) => {
           <EditableText tagName="p" text={data?.description || 'Our state-of-the-art facility is designed to host the most prestigious events. Featuring panoramic views and luxury amenities.'} isReadOnly={isReadOnly} onUpdate={(val: string) => onUpdate({ ...data, description: val })} style={{ color: colors.textMuted, fontSize: '16px', lineHeight: 1.8, marginBottom: '40px' }} />
           
           {(data.address || (data.lat && data.lng)) && (
-            <div style={{ borderRadius: '32px', overflow: 'hidden', height: '220px', border: `1px solid ${colors.border}`, boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }}>
+            <div className="venue-map-wrapper" style={{ borderRadius: '32px', overflow: 'hidden', height: '220px', border: `1px solid ${colors.border}`, boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }}>
               <GoogleMapDisplay 
                 apiKey={GOOGLE_MAPS_API_KEY}
                 address={data.address}
@@ -938,7 +994,7 @@ const Venue = ({ colors, data, onUpdate, isReadOnly }: any) => {
 
 const Contact = ({ colors, data, onUpdate, isReadOnly }: any) => {
   const bgImg = data?.backgroundImage || '';
-  const vPadding = data?.verticalPadding !== undefined ? `${data.verticalPadding}px` : '160px';
+  const vPadding = data?.verticalPadding !== undefined ? `${data.verticalPadding}px` : '40px';
 
   return (
     <section id="contact" style={{ 
@@ -1024,22 +1080,29 @@ const btnBase: React.CSSProperties = {
 };
 
 // ─── Main Component ───────────────────────────────────────────────────────────
-export default function ThemeTwo({ 
-  data, 
-  themeConfig, 
-  isReadOnly, 
-  onUpdateSection, 
-  profiles, 
+export default function ThemeTwo({
+  data,
+  themeConfig,
+  isReadOnly,
+  onUpdateSection,
+  profiles,
   onTabChange,
-  footerData, 
+  footerData,
   onUpdateFooter,
   onMoveUp,
   onMoveDown,
   onDelete,
-  onAddClick
+  onAddClick,
+  forceMobile
 }: ThemeTwoProps) {
+
   const colors = getColors(themeConfig);
   const [settingsSection, setSettingsSection] = useState<{ id: string, type: string, data: any } | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const renderThemeSection = (section: any, index: number) => {
     const isFirst = index === 0;
@@ -1083,7 +1146,12 @@ export default function ThemeTwo({
       return (
         <SectionComponent 
           key={section.id || index}
-          {...{ index, isReadOnly, onMoveUp, onMoveDown, onDelete, onAddClick, isFirst, isLast }}
+          {...{ index, isReadOnly, isFirst, isLast }}
+          onMoveUp={() => onMoveUp?.(index)}
+          onMoveDown={() => onMoveDown?.(index)}
+          onDelete={() => onDelete?.(index)}
+          onAddSection={() => onAddClick?.(index)}
+          onAddSectionBelow={() => onAddClick?.(index + 1)}
           data={section.data}
           updateData={(newData: any) => onUpdateSection?.(section.id, newData)}
           themeConfig={{
@@ -1095,7 +1163,7 @@ export default function ThemeTwo({
       );
     }
 
-    const defaultPadding = section.type === 'AGENDA' || section.type === 'SESSIONS' ? 180 : 160;
+    const defaultPadding = section.type === 'AGENDA' || section.type === 'SESSIONS' ? 30 : 20;
     const currentPadding = section.data?.verticalPadding !== undefined ? section.data.verticalPadding : defaultPadding;
 
     return (
@@ -1111,30 +1179,29 @@ export default function ThemeTwo({
         isFirst={isFirst}
         isLast={isLast}
       >
-        <div className="editable-element" style={{ position: 'relative' }}>
-          {!isReadOnly && (
-            <div style={{ position: 'absolute', top: '20px', right: '40px', zIndex: 100 }}>
-              <EditToolbar onSettingsClick={() => setSettingsSection({ ...section, type: settingsMode })} />
-            </div>
-          )}
-          <SectionComponent 
-            colors={colors}
-            data={section.data}
-            isReadOnly={isReadOnly}
-            onUpdate={(newData: any) => onUpdateSection?.(section.id, newData)}
-          />
-        </div>
+        <SectionComponent 
+          colors={colors}
+          data={section.data}
+          isReadOnly={isReadOnly}
+          isMounted={isMounted}
+          onUpdate={(newData: any) => onUpdateSection?.(section.id, newData)}
+        />
       </ThemeSectionWrapper>
     );
   };
 
   return (
-    <div style={{ 
-      fontFamily: themeConfig?.fontFamily || "'Inter', sans-serif", 
-      background: colors.background, 
-      color: colors.text, 
-      scrollBehavior: 'smooth' 
-    }}>
+    <div 
+      className={forceMobile ? "is-mobile-preview" : ""}
+      style={{
+        fontFamily: themeConfig?.fontFamily || "'Inter', sans-serif",
+        background: colors.background,
+        color: colors.text,
+        scrollBehavior: 'smooth',
+        '--primary': colors.primary
+      } as any}
+    >
+
       {/* Font Injections */}
       <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=Montserrat:wght@400;700&family=Roboto:wght@400;700&family=Poppins:wght@400;700&family=Lora:wght@400;700&family=Merriweather:wght@400;700&display=swap" rel="stylesheet" />
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
@@ -1247,60 +1314,226 @@ export default function ThemeTwo({
 
         /* ThemeTwo Mobile Responsiveness */
         @media (max-width: 1024px) {
-          .hero-flex { flex-direction: column !important; }
-          .hero-content-wrapper { padding: 120px 40px 60px !important; flex: none !important; width: 100% !important; }
-          .hero-image-wrapper { height: 500px !important; flex: none !important; width: 100% !important; overflow: hidden; padding: 0 !important; }
-          .hero-stats-card { left: 50% !important; bottom: 40px !important; transform: translateX(-50%) !important; }
-          .hero-pattern { width: 100% !important; height: 60% !important; }
+         /* Show section controls on mobile */
+          .opacity-0.group-hover\\:opacity-100 {
+            opacity: 1 !important;
+            visibility: visible !important;
+          }
+          .pointer-events-none {
+            pointer-events: auto !important;
+          }
+          .section-control-btn {
+            background-color: #0f172a !important;
+            color: white !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
+            border-color: rgba(255,255,255,0.1) !important;
+          }
+          .section-control-btn i {
+            color: white !important;
+          }
+
+         .hero-flex { flex-direction: column !important; }
+         .hero-content-wrapper { padding: 100px 24px 60px !important; flex: none !important; width: 100% !important; text-align: center !important; display: flex !important; flex-direction: column !important; align-items: center !important; }
+         .hero-image-wrapper { height: 400px !important; flex: none !important; width: 100% !important; overflow: hidden; padding: 0 !important; }
+         .hero-stats-card { left: 50% !important; bottom: 30px !important; transform: translateX(-50%) !important; min-width: 180px !important; }
+         .hero-pattern { width: 100% !important; height: 60% !important; }
         }
 
         @media (max-width: 768px) {
-          .hero-title { font-size: 42px !important; letter-spacing: -2px !important; }
-          .nav-links { display: none !important; }
-          .hero-stats-card { padding: 20px !important; min-width: 150px !important; }
-          .hero-stats-card div:first-child { font-size: 32px !important; }
-          
-          /* About Section */
+         .mobile-menu-btn { display: block !important; }
+         .hero-title { font-size: 36px !important; letter-spacing: -1px !important; line-height: 1.1 !important; text-align: center !important; }
+         .hero-subtitle { font-size: 16px !important; text-align: center !important; margin: 0 auto 32px !important; max-width: 100% !important; }
+         .nav-links { display: none !important; }
+         .hero-stats-card { padding: 16px !important; min-width: 150px !important; }
+         .hero-stats-card div:first-child { font-size: 28px !important; }
+
+         .hero-cta-group { justify-content: center !important; flex-direction: column !important; width: 100% !important; gap: 16px !important; align-items: center !important; }
+         .hero-cta { width: auto !important; min-width: 240px !important; max-width: 100% !important; margin: 0 auto !important; display: flex !important; justify-content: center !important; align-items: center !important; padding: 20px 40px !important; font-size: 13px !important; }
+         
+         .hero-date-badge { justify-content: center !important; margin-bottom: 32px !important; }
+         .hero-date-badge span:first-child, .hero-date-badge span:last-child { width: 40px !important; }
+
+         /* About Section */
           #about > div > div {
             grid-template-columns: 1fr !important;
-            gap: 60px !important;
+            gap: 40px !important;
+            text-align: center !important;
           }
           #about > div > div > div:first-child {
-             height: 400px !important;
+             height: 350px !important;
+             margin-bottom: 40px !important;
           }
           #about img {
-             height: 400px !important;
+             height: 350px !important;
+             border-radius: 24px !important;
           }
+          #about h2 { font-size: 32px !important; margin-bottom: 24px !important; }
+          #about p { margin-left: auto !important; margin-right: auto !important; font-size: 16px !important; }
+          #about div[style*="position: absolute"] {
+            width: 140px !important;
+            height: 140px !important;
+            border-radius: 30px !important;
+            padding: 20px !important;
+          }
+          #about div[style*="position: absolute"] span { font-size: 14px !important; }
 
           /* Speakers Grid */
+          #speakers > div:first-child { margin-bottom: 60px !important; }
+          #speakers h2 { font-size: 40px !important; letter-spacing: -1px !important; }
           #speakers > div > div:last-child {
             grid-template-columns: 1fr !important;
+            gap: 30px !important;
+            padding: 0 10px !important;
+          }
+          #speakers button[style*="min-height: 600px"] {
+            min-height: 180px !important;
+            padding: 40px !important;
           }
 
           /* Agenda Timeline */
+          #schedule > div > div:first-child {
+            margin-bottom: 40px !important;
+          }
+          #schedule h2 {
+            font-size: 36px !important;
+          }
           .agenda-item {
             flex-direction: column !important;
-            gap: 30px !important;
-            padding: 40px !important;
+            gap: 24px !important;
+            padding: 30px 24px !important;
+            border-radius: 24px !important;
           }
           .agenda-item > div:first-child {
             width: 100% !important;
           }
 
-          /* Venue Info Panel */
-          #venue > div > div:last-child > div:last-child {
+          /* Gallery Grid */
+          #gallery > div:first-child { margin-bottom: 40px !important; }
+          #gallery h2 { font-size: 36px !important; }
+          #gallery div[style*="grid-template-columns"] {
+            grid-template-columns: 1fr !important;
+            gap: 20px !important;
+          }
+          #gallery div[style*="height: 400px"] { height: 300px !important; border-radius: 24px !important; }
+
+          /* Venue Section Styling */
+          .venue-container {
+            height: auto !important;
+            display: flex !important;
+            flex-direction: column !important;
+            border-radius: 32px !important;
+          }
+          .venue-container div:first-child {
+            height: 300px !important;
+          }
+          .venue-info-panel {
             position: relative !important;
             bottom: 0 !important;
             left: 0 !important;
-            margin: 20px !important;
-            max-width: calc(100% - 40px) !important;
-            padding: 30px !important;
+            margin: -60px 20px 40px !important;
+            width: calc(100% - 40px) !important;
+            max-width: 100% !important;
+            padding: 40px 30px !important;
+            border-radius: 32px !important;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1) !important;
           }
-          #venue > div > div:last-child {
-            height: auto !important;
+          .venue-info-panel h2 {
+            font-size: 32px !important;
+          }
+          .venue-map-wrapper {
+            height: 200px !important;
+            border-radius: 20px !important;
+          }
+
+          /* Contact Section */
+          #contact > div > div {
+            grid-template-columns: 1fr !important;
+            gap: 60px !important;
+            text-align: center !important;
+          }
+          #contact h2 { font-size: 36px !important; }
+          #contact p { font-size: 16px !important; }
+          #contact div[style*="display: flex"] { justify-content: center !important; }
+          #contact div[style*="background: rgba(255,255,255,0.03)"] {
+            padding: 40px 24px !important;
+            border-radius: 32px !important;
           }
         }
+
+        /* Editor Mobile Preview Support */
+        .is-mobile-preview .theme-navbar {
+          height: 60px !important;
+          background: ${colors.navbar} !important;
+        }
+        .is-mobile-preview .nav-container {
+          padding: 0 20px !important;
+          justify-content: space-between !important;
+        }
+        .is-mobile-preview .mobile-menu-btn {
+          display: block !important;
+        }
+        .is-mobile-preview .nav-logo {
+          font-size: 1.3rem !important;
+        }
+        .is-mobile-preview .opacity-0.group-hover\\:opacity-100 {
+          opacity: 1 !important;
+          visibility: visible !important;
+        }
+        .is-mobile-preview .pointer-events-none {
+          pointer-events: auto !important;
+        }
+        .is-mobile-preview .section-control-btn {
+          background-color: #0f172a !important;
+          color: white !important;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
+          border-color: rgba(255,255,255,0.1) !important;
+        }
+        .is-mobile-preview .section-control-btn i {
+          color: white !important;
+        }
+
+        .is-mobile-preview .hero-flex { flex-direction: column !important; }
+        .is-mobile-preview .hero-content-wrapper { padding: 100px 24px 60px !important; flex: none !important; width: 100% !important; text-align: center !important; display: flex !important; flex-direction: column !important; align-items: center !important; }
+        .is-mobile-preview .hero-image-wrapper { height: 400px !important; flex: none !important; width: 100% !important; overflow: hidden; padding: 0 !important; }
+        .is-mobile-preview .hero-stats-card { left: 50% !important; bottom: 30px !important; transform: translateX(-50%) !important; min-width: 180px !important; }
+        .is-mobile-preview .hero-pattern { width: 100% !important; height: 60% !important; }
+        .is-mobile-preview .hero-title { font-size: 36px !important; letter-spacing: -1px !important; line-height: 1.1 !important; text-align: center !important; }
+        .is-mobile-preview .hero-subtitle { font-size: 16px !important; text-align: center !important; margin: 0 auto 32px !important; max-width: 100% !important; }
+        .is-mobile-preview .nav-links { display: none !important; }
+        .is-mobile-preview .hero-stats-card { padding: 16px !important; min-width: 150px !important; }
+        .is-mobile-preview .hero-stats-card div:first-child { font-size: 28px !important; }
+        .is-mobile-preview .hero-cta-group { justify-content: center !important; flex-direction: column !important; width: 100% !important; gap: 12px !important; align-items: center !important; }
+        .is-mobile-preview .hero-cta { width: 100% !important; max-width: 300px !important; margin: 0 auto !important; display: flex !important; justify-content: center !important; align-items: center !important; }
+        .is-mobile-preview #about > div > div { grid-template-columns: 1fr !important; gap: 40px !important; text-align: center !important; }
+        .is-mobile-preview #about > div > div > div:first-child { height: 350px !important; margin-bottom: 40px !important; }
+        .is-mobile-preview #about img { height: 350px !important; border-radius: 24px !important; }
+        .is-mobile-preview #about h2 { font-size: 32px !important; margin-bottom: 24px !important; }
+        .is-mobile-preview #about p { margin-left: auto !important; margin-right: auto !important; font-size: 16px !important; }
+        .is-mobile-preview #about div[style*="position: absolute"] { width: 140px !important; height: 140px !important; border-radius: 30px !important; padding: 20px !important; }
+        .is-mobile-preview #speakers > div:first-child { margin-bottom: 60px !important; }
+        .is-mobile-preview #speakers h2 { font-size: 40px !important; letter-spacing: -1px !important; }
+        .is-mobile-preview #speakers > div > div:last-child { grid-template-columns: 1fr !important; gap: 30px !important; padding: 0 10px !important; }
+        .is-mobile-preview #speakers button[style*="min-height: 600px"] { min-height: 180px !important; padding: 40px !important; }
+        .is-mobile-preview #schedule > div > div:first-child { margin-bottom: 40px !important; }
+        .is-mobile-preview #schedule h2 { font-size: 36px !important; }
+        .is-mobile-preview .agenda-item { flex-direction: column !important; gap: 24px !important; padding: 30px 24px !important; border-radius: 24px !important; }
+        .is-mobile-preview .agenda-item > div:first-child { width: 100% !important; }
+        .is-mobile-preview .venue-container { height: auto !important; display: flex !important; flex-direction: column !important; border-radius: 32px !important; }
+        .is-mobile-preview .venue-container div:first-child { height: 300px !important; }
+        .is-mobile-preview .venue-info-panel { position: relative !important; bottom: 0 !important; left: 0 !important; margin: -60px 20px 40px !important; width: calc(100% - 40px) !important; max-width: 100% !important; padding: 40px 30px !important; border-radius: 32px !important; box-shadow: 0 20px 50px rgba(0,0,0,0.1) !important; }
+        .is-mobile-preview .venue-info-panel h2 { font-size: 32px !important; }
+        .is-mobile-preview .venue-map-wrapper { height: 200px !important; border-radius: 20px !important; }
+        .is-mobile-preview #gallery > div:first-child { margin-bottom: 40px !important; }
+        .is-mobile-preview #gallery h2 { font-size: 36px !important; }
+        .is-mobile-preview #gallery div[style*="grid-template-columns"] { grid-template-columns: 1fr !important; gap: 20px !important; }
+        .is-mobile-preview #gallery div[style*="height: 400px"] { height: 300px !important; border-radius: 24px !important; }
+        .is-mobile-preview #contact > div > div { grid-template-columns: 1fr !important; gap: 60px !important; text-align: center !important; }
+        .is-mobile-preview #contact h2 { font-size: 36px !important; }
+        .is-mobile-preview #contact p { font-size: 16px !important; }
+        .is-mobile-preview #contact div[style*="display: flex"] { justify-content: center !important; }
+        .is-mobile-preview #contact div[style*="background: rgba(255,255,255,0.03)"] { padding: 40px 24px !important; border-radius: 32px !important; }
       `}</style>
     </div>
   );
 }
+

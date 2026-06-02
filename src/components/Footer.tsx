@@ -6,6 +6,8 @@ interface FooterProps {
   data?: {
     description: string;
     copyright: string;
+    eventName?: string;
+    logo?: string;
   };
   updateData?: (newData: any) => void;
   isReadOnly?: boolean;
@@ -45,7 +47,7 @@ const Footer: React.FC<FooterProps> = ({ profiles = [], data, updateData, isRead
 
   return (
     <footer style={{ 
-      padding: '60px 0', 
+      padding: '30px 0', 
       background: colors.background === '#ffffff' ? '#f8fafc' : colors.background, 
       borderTop: '1px solid rgba(0,0,0,0.05)',
       textAlign: 'center',
@@ -53,16 +55,16 @@ const Footer: React.FC<FooterProps> = ({ profiles = [], data, updateData, isRead
       fontFamily: themeConfig?.fontFamily || 'inherit'
     }}>
       <div className={styles.container}>
-        <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'center' }}>
+        <div style={{ marginBottom: '12px', display: 'flex', justifyContent: 'center' }}>
           <div 
             style={{ cursor: isReadOnly ? 'default' : 'pointer', position: 'relative' }}
             onClick={triggerLogoUpload}
           >
             {footerData.logo ? (
-              <img src={footerData.logo} alt="Logo" style={{ height: '40px', maxWidth: '150px', objectFit: 'contain' }} />
+              <img src={footerData.logo} alt="Logo" style={{ height: '32px', maxWidth: '120px', objectFit: 'contain' }} />
             ) : (
               <span 
-                style={{ fontSize: '20px', fontWeight: 800, color: colors.text, letterSpacing: '-0.5px', outline: 'none' }}
+                style={{ fontSize: '18px', fontWeight: 800, color: colors.text, letterSpacing: '-0.5px', outline: 'none' }}
                 contentEditable={!isReadOnly}
                 suppressContentEditableWarning
                 onBlur={(e: any) => {
@@ -75,7 +77,7 @@ const Footer: React.FC<FooterProps> = ({ profiles = [], data, updateData, isRead
               </span>
             )}
             {!isReadOnly && (
-              <div style={{ position: 'absolute', bottom: '-12px', left: '50%', transform: 'translateX(-50%)', fontSize: '8px', background: colors.primary, color: '#fff', padding: '1px 4px', borderRadius: '2px', fontWeight: 800, whiteSpace: 'nowrap' }}>
+              <div style={{ position: 'absolute', bottom: '-10px', left: '50%', transform: 'translateX(-50%)', fontSize: '7px', background: colors.primary, color: '#fff', padding: '1px 3px', borderRadius: '2px', fontWeight: 800, whiteSpace: 'nowrap' }}>
                 {footerData.logo ? 'CHANGE LOGO' : 'UPLOAD LOGO'}
               </div>
             )}
@@ -83,7 +85,7 @@ const Footer: React.FC<FooterProps> = ({ profiles = [], data, updateData, isRead
         </div>
 
         <p 
-          style={{ color: colors.textMuted, fontSize: '15px', marginBottom: '24px', maxWidth: '600px', margin: '0 auto 24px', outline: 'none', lineHeight: 1.6 }}
+          style={{ color: colors.textMuted, fontSize: '14px', marginBottom: '16px', maxWidth: '600px', margin: '0 auto 16px', outline: 'none', lineHeight: 1.4 }}
           contentEditable={!isReadOnly}
           suppressContentEditableWarning
           onBlur={(e: any) => updateData?.({ ...footerData, description: e.target.innerText })}
@@ -95,32 +97,31 @@ const Footer: React.FC<FooterProps> = ({ profiles = [], data, updateData, isRead
         <div style={{ 
           display: 'flex', 
           justifyContent: 'center', 
-          gap: '32px', 
-          marginBottom: '32px',
+          gap: '24px', 
+          marginBottom: '20px',
           flexWrap: 'wrap'
         }}>
           {profiles.filter(p => p.isVisible !== false).map((profile) => (
             <a 
               key={profile.id} 
               href="#" 
-              style={{ color: '#1e293b', fontSize: '13px', fontWeight: 600, textDecoration: 'none', textTransform: 'uppercase' }}
+              style={{ color: '#1e293b', fontSize: '12px', fontWeight: 600, textDecoration: 'none', textTransform: 'uppercase' }}
             >
               {profile.name}
             </a>
           ))}
           {profiles.length === 0 && (
             <>
-              <a href="#" style={{ color: '#1e293b', fontSize: '13px', fontWeight: 600, textDecoration: 'none' }}>Privacy Policy</a>
-              <a href="#" style={{ color: '#1e293b', fontSize: '13px', fontWeight: 600, textDecoration: 'none' }}>Terms of Service</a>
-              <a href="#" style={{ color: '#1e293b', fontSize: '13px', fontWeight: 600, textDecoration: 'none' }}>Contact Support</a>
-              <a href="#" style={{ color: '#1e293b', fontSize: '13px', fontWeight: 600, textDecoration: 'none' }}>About Us</a>
+              <a href="#" style={{ color: '#1e293b', fontSize: '12px', fontWeight: 600, textDecoration: 'none' }}>Privacy Policy</a>
+              <a href="#" style={{ color: '#1e293b', fontSize: '12px', fontWeight: 600, textDecoration: 'none' }}>Terms of Service</a>
+              <a href="#" style={{ color: '#1e293b', fontSize: '12px', fontWeight: 600, textDecoration: 'none' }}>Contact Support</a>
             </>
           )}
         </div>
 
-        <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '24px' }}>
+        <div style={{ borderTop: '1px solid rgba(0,0,0,0.05)', paddingTop: '16px' }}>
           <p 
-            style={{ color: '#94a3b8', fontSize: '12px', letterSpacing: '0.05em', outline: 'none' }}
+            style={{ color: '#94a3b8', fontSize: '11px', letterSpacing: '0.05em', outline: 'none' }}
             contentEditable={!isReadOnly}
             suppressContentEditableWarning
             onBlur={(e) => updateData?.({ ...footerData, copyright: e.target.innerText })}
