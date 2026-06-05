@@ -250,8 +250,9 @@ const Navbar = ({ primaryColor, isReadOnly, logo, profiles, onTabChange, section
       if (id === 'hero') id = 'home';
       if (id === 'agenda') id = 'sessions';
       if (id === 'contact' || id === 'getintouch') id = 'contact';
+      const isHome = id === 'home';
       
-      return { id, label: label.toUpperCase(), isSection: true, profileName: homeProfile?.name || 'HOME' };
+      return { id, label: label.toUpperCase(), isSection: !isHome, isProfile: isHome, profileName: homeProfile?.name || 'HOME' };
     });
 
   // 2. Get profile links (other than home)
@@ -328,7 +329,7 @@ const Navbar = ({ primaryColor, isReadOnly, logo, profiles, onTabChange, section
           transition: "all 0.3s ease"
         }}>
           {navItems.map((item, idx) => (
-            <li key={`${item.id}-${idx}`} style={{ flexShrink: 0 }}>
+            <li key={`${item.id}-${idx}`} style={{ flexShrink: 0 }} className={item.isSection ? 'section-link' : 'profile-link'}>
               <button onClick={() => {
                 if (item.isProfile) {
                   if (onTabChange) onTabChange(item.profileName);
@@ -400,6 +401,9 @@ const Navbar = ({ primaryColor, isReadOnly, logo, profiles, onTabChange, section
           }
           .nav-links li:last-child button {
             border-bottom: none;
+          }
+          .nav-links li.section-link {
+            display: none !important;
           }
         }
       `}</style>
