@@ -36,6 +36,8 @@ interface ContentSectionProps {
   onMoveDown?: () => void;
   onDelete?: () => void;
   onToggleVisibility?: () => void;
+  onAddSection?: () => void;
+  onAddSectionBelow?: () => void;
   isFirst?: boolean;
   isLast?: boolean;
   isReadOnly?: boolean;
