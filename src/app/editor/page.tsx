@@ -8,37 +8,38 @@ import LeftSidebar from "@/components/editor/LeftSidebar";
 import EventNavbar from "@/components/editor/EventNavbar";
 import HeroSection from "@/components/editor/HeroSection";
 import SectionWrapper from "@/components/editor/SectionWrapper";
-import { 
-  WhyAttendSection, 
-  SpeakersSection, 
-  FeaturedSessionsSection, 
-  SponsorsSection, 
-  VenueSection,
-  AgendaSection,
-  MediaTextSection,
-  MediaGroupSection,
-  NumberCounterSection,
-  TestimonialsSection,
-  CountdownSection,
-  TextSection,
-  ListSection,
-  EmbedWidgetSection,
-  ContactFormSection,
-  SponsorCategorySection,
-  FloorPlanSection,
-  CustomHTMLSection,
-  MovingLineSection
-} from "@/components/editor/ContentSections";
-import GetInTouchSection from "@/components/editor/GetInTouchSection";
-import Footer from "@/components/Footer";
-import VisualsPanel from "@/components/editor/VisualsPanel";
-import ThemesPanel, { ThemePreset } from "@/components/editor/ThemesPanel";
-import PagesPanel from "@/components/editor/PagesPanel";
 import ThemeOne from "@/components/editor/ThemeOne";
 import ThemeTwo from "@/components/editor/ThemeTwo";
 import ThemeThree from "@/components/editor/ThemeThree";
+import FeaturedSessions from "@/components/editor/FeaturedSessions";
+import SponsorsSection from "@/components/editor/SponsorsSection";
+import { 
+  MediaTextSection, 
+  MediaGroupSection, 
+  NumberCounterSection, 
+  TestimonialsSection, 
+  CountdownSection, 
+  TextSection, 
+  ListSection, 
+  EmbedWidgetSection,
+  SponsorCategorySection,
+  FloorPlanSection,
+  CustomHTMLSection,
+  MovingLineSection,
+  AgendaSection,
+  VenueSection,
+  ContactFormSection,
+  WhyAttendSection,
+  SpeakersSection,
+  FeaturedSessionsSection,
+  GallerySection
+} from "@/components/editor/ContentSections";
 import GlobalSettingsPanel from "@/components/editor/GlobalSettingsPanel";
 import AddSectionModal from "@/components/editor/AddSectionModal";
+import ThemesPanel from "@/components/editor/ThemesPanel";
+import VisualsPanel from "@/components/editor/VisualsPanel";
+import PagesPanel from "@/components/editor/PagesPanel";
+import Footer from "@/components/Footer";
 
 import { Suspense } from "react";
 
@@ -129,11 +130,12 @@ function NavratriEditorContent() {
           type: 'SESSIONS', 
           isVisible: true, 
           data: { 
-            title: 'Featured Sessions',
-            subtitle: 'Deep dives into modern technology',
+            badge: 'FEATURED SESSIONS',
+            title: "Don't miss these highlights",
             items: [
-              { time: '09:00 AM', title: 'Opening Keynote: The AI Era', desc: 'Navigating the future of artificial intelligence.', speaker: 'Sarah Johnson' },
-              { time: '11:30 AM', title: 'Blockchain & Beyond', desc: 'Real-world applications of decentralized systems.', speaker: 'Michael Chen' }
+              { category: 'KEYNOTE', title: 'Future of AI in Everyday Life', description: 'How AI will reshape work, health, and creativity by 2030', speaker: 'Sarah Johnson', time: '9:00 AM' },
+              { category: 'WORKSHOP', title: 'Build Your First AI Product', description: 'Hands-on session from idea to live demo in 90 minutes', speaker: 'Michael Chen', time: '11:30 AM' },
+              { category: 'PANEL', title: 'Ethics & Privacy in Automation', description: 'Navigating the challenges of an increasingly automated world', speaker: 'Priya Rao', time: '2:00 PM' }
             ] 
           } 
         },
@@ -145,6 +147,21 @@ function NavratriEditorContent() {
             name: 'Innovation Hub', 
             address: '456 Tech Plaza, San Francisco, CA', 
             description: 'A world-class facility equipped with state-of-the-art technology and premium amenities for a superior event experience.' 
+          } 
+        },
+        { 
+          id: 'gallery', 
+          type: 'GALLERY', 
+          isVisible: true, 
+          data: { 
+            badge: 'MOMENTS',
+            title: 'Event Gallery',
+            items: [
+              { image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800', title: 'Grand Opening' },
+              { image: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=800', title: 'Tech Talk' },
+              { image: 'https://images.unsplash.com/photo-1511578314322-379afb476865?w=800', title: 'Networking' },
+              { image: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800', title: 'Closing Ceremony' }
+            ]
           } 
         },
         { 
@@ -429,6 +446,16 @@ function NavratriEditorContent() {
         defaultData = { categories: [{ name: 'Platinum', sponsors: [] }] };
         break;
       case 'SESSIONS':
+        defaultData = { 
+          badge: 'FEATURED SESSIONS',
+          title: "Don't miss these highlights", 
+          items: [
+            { category: 'KEYNOTE', title: 'Future of AI in Everyday Life', description: 'How AI will reshape work, health, and creativity by 2030', speaker: 'Sarah Johnson', time: '9:00 AM' },
+            { category: 'WORKSHOP', title: 'Build Your First AI Product', description: 'Hands-on session from idea to live demo in 90 minutes', speaker: 'Michael Chen', time: '11:30 AM' },
+            { category: 'PANEL', title: 'Ethics & Privacy in Automation', description: 'Navigating the challenges of an increasingly automated world', speaker: 'Priya Rao', time: '2:00 PM' }
+          ] 
+        };
+        break;
       case 'SCHEDULE':
         defaultData = { 
           title: 'Event Schedule', 
@@ -505,10 +532,35 @@ function NavratriEditorContent() {
     switch (section.type) {
       case 'HERO':
         return <HeroSection key={section.id} {...commonProps} />;
+      case 'GALLERY':
+        return (
+          <SectionWrapper key={section.id} {...commonProps}>
+            <GallerySection 
+              {...commonProps} 
+              themeConfig={{ 
+                primaryColor: themeConfig.primaryColor, 
+                backgroundColor: themeConfig.backgroundColor, 
+                textColor: themeConfig.textColor 
+              }} 
+            />
+          </SectionWrapper>
+        );
       case 'MEDIA_TEXT':
         return <MediaTextSection key={section.id} {...commonProps} />;
+      case 'GALLERY':
+        return (
+          <SectionWrapper key={section.id} {...commonProps}>
+            <GallerySection 
+              {...commonProps} 
+              themeConfig={{ 
+                primaryColor: themeConfig.primaryColor, 
+                backgroundColor: themeConfig.backgroundColor, 
+                textColor: themeConfig.textColor 
+              }} 
+            />
+          </SectionWrapper>
+        );
       case 'MEDIA_GROUP':
-        return <MediaGroupSection key={section.id} {...commonProps} />;
       case 'COUNTER':
         return <NumberCounterSection key={section.id} {...commonProps} />;
       case 'TESTIMONIALS':
@@ -524,11 +576,39 @@ function NavratriEditorContent() {
       case 'SPEAKERS':
         return <SpeakersSection key={section.id} {...commonProps} />;
       case 'SPONSORS':
-        return <SponsorsSection key={section.id} {...commonProps} />;
       case 'SPONSOR_CAT':
-        return <SponsorCategorySection key={section.id} {...commonProps} />;
-      case 'AGENDA':
+        return (
+          <SectionWrapper key={section.id} {...commonProps}>
+            <SponsorsSection 
+              colors={{ 
+                primary: themeConfig.primaryColor, 
+                text: themeConfig.textColor, 
+                background: themeConfig.backgroundColor,
+                textGrey: '#64748b' 
+              }} 
+              data={section.data} 
+              isReadOnly={false} 
+              onUpdate={(newData: any) => updateSectionData(section.id, newData)} 
+            />
+          </SectionWrapper>
+        );
       case 'SESSIONS':
+        return (
+          <SectionWrapper key={section.id} {...commonProps}>
+            <FeaturedSessions 
+              colors={{ 
+                primary: themeConfig.primaryColor, 
+                text: themeConfig.textColor, 
+                background: themeConfig.backgroundColor,
+                textGrey: '#64748b' 
+              }} 
+              data={section.data} 
+              isReadOnly={false} 
+              onUpdate={(newData: any) => updateSectionData(section.id, newData)} 
+            />
+          </SectionWrapper>
+        );
+      case 'AGENDA':
       case 'SCHEDULE':
         return <AgendaSection key={section.id} {...commonProps} />;
       case 'FLOOR_PLAN':

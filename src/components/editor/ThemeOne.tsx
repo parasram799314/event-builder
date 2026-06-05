@@ -59,7 +59,7 @@ const ThemeSectionWrapper = ({
   const showControlsClass = forceMobile ? "opacity-100" : "opacity-0 group-hover:opacity-100";
 
   return (
-    <div className={`group relative border-y-2 border-transparent hover:border-blue-500/50 transition-all duration-300 my-2 ${forceMobile ? 'is-mobile-editor' : ''}`}>
+    <div className={`group relative border-y-2 border-transparent hover:border-blue-500/50 transition-all duration-300 ${isFirst ? 'mb-12' : 'my-12'} ${forceMobile ? 'is-mobile-editor' : ''}`}>
       {/* Add Section Button Above */}
       {isFirst && (
         <div className={`absolute top-0 left-0 right-0 -translate-y-1/2 flex items-center justify-center transition-all z-[9999] h-10 pointer-events-none ${showControlsClass}`}>
@@ -288,12 +288,13 @@ const Navbar = ({ primaryColor, isReadOnly, logo, profiles, onTabChange, section
             ) : (
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <div 
-                  style={{ color: "#fff", fontWeight: 700, fontSize: "1.4rem", letterSpacing: '1px', outline: 'none' }}
+                  style={{ color: primaryColor, fontWeight: 800, fontSize: "1.5rem", letterSpacing: '-1px', outline: 'none', display: 'flex', alignItems: 'center' }}
                   contentEditable={!isReadOnly}
                   suppressContentEditableWarning
                   onClick={(e) => !isReadOnly && e.stopPropagation()}
                 >
-                  EVENT<span style={{ color: primaryColor }}>BUILDER</span>
+                  <span style={{ color: '#fff', marginRight: '4px' }}>EVENT</span>
+                  <span>BUILDER</span>
                 </div>
               </div>
             )}
@@ -407,86 +408,92 @@ const Navbar = ({ primaryColor, isReadOnly, logo, profiles, onTabChange, section
 };
 
 // ─── Countdown Timer ────────────────────────────────────────────────────────
-const CountdownTimer = ({ colors }: { colors: any }) => {
+const CountdownTimer = ({ colors, targetDate }: { colors: any, targetDate?: string }) => {
   const [timeLeft, setTimeLeft] = useState({
-    days: 12,
-    hours: 5,
-    minutes: 45,
-    seconds: 30
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0
   });
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev.seconds > 0) return { ...prev, seconds: prev.seconds - 1 };
-        if (prev.minutes > 0) return { ...prev, minutes: prev.minutes - 1, seconds: 59 };
-        if (prev.hours > 0) return { ...prev, hours: prev.hours - 1, minutes: 59, seconds: 59 };
-        if (prev.days > 0) return { ...prev, days: prev.days - 1, hours: 23, minutes: 59, seconds: 59 };
-        return prev;
-      });
-    }, 1000);
+    const calculateTime = () => {
+      const target = new Date(targetDate || '2026-10-15T09:00').getTime();
+      const now = new Date().getTime();
+      const difference = target - now;
+
+      if (difference > 0) {
+        setTimeLeft({
+          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+          hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+          minutes: Math.floor((difference / 1000 / 60) % 60),
+          seconds: Math.floor((difference / 1000) % 60)
+        });
+      } else {
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+      }
+    };
+
+    calculateTime();
+    const timer = setInterval(calculateTime, 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [targetDate]);
 
   const unitStyle: React.CSSProperties = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    background: 'rgba(255,255,255,0.1)',
-    backdropFilter: 'blur(12px)',
-    padding: '16px',
-    borderRadius: '16px',
-    minWidth: '90px',
-    border: '1px solid rgba(255,255,255,0.2)',
-    boxShadow: '0 10px 30px rgba(0,0,0,0.1)'
+    background: 'rgba(255,255,255,0.05)',
+    backdropFilter: 'blur(15px)',
+    padding: '24px',
+    borderRadius: '24px',
+    minWidth: '110px',
+    border: '1px solid rgba(255,255,255,0.1)',
+    boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
+    transition: 'all 0.3s ease'
   };
 
   const valStyle: React.CSSProperties = {
-    fontSize: '42px',
+    fontSize: '48px',
     fontWeight: 800,
-    color: colors.white,
+    color: '#fff',
     lineHeight: 1,
-    letterSpacing: '-1px'
+    letterSpacing: '-2px'
   };
 
   const labelStyle: React.CSSProperties = {
     fontSize: '11px',
     fontWeight: 700,
     textTransform: 'uppercase',
-    letterSpacing: '2px',
+    letterSpacing: '3px',
     color: colors.primary,
-    marginTop: '8px',
+    marginTop: '12px',
     opacity: 0.9
   };
 
   return (
-    <div className="countdown-container" style={{ display: 'flex', gap: '20px', justifyContent: 'center', marginTop: '50px' }}>
-      <div style={unitStyle}>
-        <span style={valStyle}>{String(timeLeft.days).padStart(2, '0')}</span>
-        <span style={labelStyle}>Days</span>
-      </div>
-      <div style={unitStyle}>
-        <span style={valStyle}>{String(timeLeft.hours).padStart(2, '0')}</span>
-        <span style={labelStyle}>Hours</span>
-      </div>
-      <div style={unitStyle}>
-        <span style={valStyle}>{String(timeLeft.minutes).padStart(2, '0')}</span>
-        <span style={labelStyle}>Mins</span>
-      </div>
-      <div style={unitStyle}>
-        <span style={valStyle}>{String(timeLeft.seconds).padStart(2, '0')}</span>
-        <span style={labelStyle}>Secs</span>
-      </div>
+    <div className="countdown-container" style={{ display: 'flex', gap: '24px', justifyContent: 'center', marginTop: '60px', flexWrap: 'wrap' }}>
+      {[
+        { label: 'Days', value: timeLeft.days },
+        { label: 'Hours', value: timeLeft.hours },
+        { label: 'Mins', value: timeLeft.minutes },
+        { label: 'Secs', value: timeLeft.seconds }
+      ].map((unit, i) => (
+        <div key={i} style={unitStyle}>
+          <span style={valStyle}>{String(unit.value).padStart(2, '0')}</span>
+          <span style={labelStyle}>{unit.label}</span>
+        </div>
+      ))}
     </div>
   );
 };
 
 // ─── Section Components ──────────────────────────────────────────────────────
-const Container = ({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) => (
-  <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 20px", ...style }}>{children}</div>
+const Container = ({ children, style, className = "" }: { children: React.ReactNode; style?: React.CSSProperties; className?: string }) => (
+  <div className={`theme-container ${className}`} style={{ maxWidth: 1100, margin: "0 auto", padding: "0 20px", ...style }}>{children}</div>
 );
 
-const HomeHero = ({ colors, data, onUpdate, isReadOnly, isMounted }: { colors: any; data: any; onUpdate: any; isReadOnly?: boolean; isMounted: boolean }) => {
+const HomeHero = ({ colors, data, onUpdate, isReadOnly, isMounted, isFirst }: { colors: any; data: any; onUpdate: any; isReadOnly?: boolean; isMounted: boolean; isFirst?: boolean }) => {
   const slide = data?.slides?.[0] || {};
   const dt = data?.dateTimeSettings || {};
   
@@ -499,8 +506,8 @@ const HomeHero = ({ colors, data, onUpdate, isReadOnly, isMounted }: { colors: a
   return (
     <section id="home" style={{
       background: `linear-gradient(rgba(15, 23, 42, 0.4),rgba(15, 23, 42, 0.7)), url('${slide.images?.[0] || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1600'}') center/cover no-repeat fixed`,
-      height: "70vh", minHeight: "600px", display: "flex", alignItems: "center", color: colors.white, textAlign: "center", position: 'relative',
-      padding: '60px 0'
+      height: "80vh", minHeight: "700px", display: "flex", alignItems: "center", color: colors.white, textAlign: "center", position: 'relative',
+      padding: isFirst ? '0 0 100px 0' : '100px 0'
     }}>
       <Container>
         {!isReadOnly && (
@@ -539,18 +546,39 @@ const HomeHero = ({ colors, data, onUpdate, isReadOnly, isMounted }: { colors: a
         <EditableText 
           tagName="h1" text={slide.title || 'Experience the Next Big Thing'} isReadOnly={isReadOnly}
           onUpdate={(val: string) => updateSlide('title', val)}
-          style={{ fontSize: 'clamp(48px, 6vw, 84px)', fontWeight: 800, letterSpacing: '-2px', marginBottom: '24px', lineHeight: '1.05', textTransform: 'uppercase', textShadow: '0 10px 30px rgba(0,0,0,0.3)' }}
+          style={{ width: '100%', textAlign: 'center', fontSize: 'clamp(32px, 6vw, 84px)', fontWeight: 800, letterSpacing: '-2px', marginBottom: '24px', lineHeight: '1.1', textTransform: 'uppercase', textShadow: '0 10px 30px rgba(0,0,0,0.3)', overflowWrap: 'break-word', wordBreak: 'break-word' }}
         />
         
         <EditableText 
           tagName="p" text={slide.subtitle || 'Join industry leaders and innovators for a three-day journey through the future of technology and networking.'} isReadOnly={isReadOnly}
           onUpdate={(val: string) => updateSlide('subtitle', val)}
-          style={{ fontSize: '22px', maxWidth: '850px', margin: '0 auto 48px', color: 'rgba(255,255,255,0.9)', lineHeight: '1.6', fontWeight: 400 }}
+          style={{ width: '100%', textAlign: 'center', fontSize: 'clamp(16px, 2vw, 22px)', maxWidth: '850px', margin: '0 auto 48px', color: 'rgba(255,255,255,0.9)', lineHeight: '1.6', fontWeight: 400, overflowWrap: 'break-word' }}
         />
         
         <div style={{ display: "flex", gap: '20px', justifyContent: "center", marginBottom: '60px', flexWrap: 'wrap' }}>
-          <button style={{ ...btnBase, background: colors.primary, borderColor: colors.primary, color: "#fff", padding: '18px 48px', boxShadow: `0 10px 25px ${colors.primary}40`, borderRadius: '14px' }}>REGISTER NOW</button>
-          <button style={{ ...btnBase, background: "rgba(255,255,255,0.1)", backdropFilter: 'blur(10px)', color: "#fff", padding: '18px 48px', border: '2px solid rgba(255,255,255,0.3)', borderRadius: '14px' }}>VIEW AGENDA</button>
+          {slide.primaryBtnLink ? (
+            <a href={slide.primaryBtnLink} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+              <button style={{ ...btnBase, background: colors.primary, borderColor: colors.primary, color: "#fff", padding: '18px 48px', boxShadow: `0 10px 25px ${colors.primary}40`, borderRadius: '14px' }}>
+                {slide.primaryBtnLabel || 'REGISTER NOW'}
+              </button>
+            </a>
+          ) : (
+            <button style={{ ...btnBase, background: colors.primary, borderColor: colors.primary, color: "#fff", padding: '18px 48px', boxShadow: `0 10px 25px ${colors.primary}40`, borderRadius: '14px' }}>
+              {slide.primaryBtnLabel || 'REGISTER NOW'}
+            </button>
+          )}
+
+          {slide.secondaryBtnLink ? (
+            <a href={slide.secondaryBtnLink} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+              <button style={{ ...btnBase, background: "rgba(255,255,255,0.1)", backdropFilter: 'blur(10px)', color: "#fff", padding: '18px 48px', border: '2px solid rgba(255,255,255,0.3)', borderRadius: '14px' }}>
+                {slide.secondaryBtnLabel || 'VIEW AGENDA'}
+              </button>
+            </a>
+          ) : (
+            <button style={{ ...btnBase, background: "rgba(255,255,255,0.1)", backdropFilter: 'blur(10px)', color: "#fff", padding: '18px 48px', border: '2px solid rgba(255,255,255,0.3)', borderRadius: '14px' }}>
+              {slide.secondaryBtnLabel || 'VIEW AGENDA'}
+            </button>
+          )}
         </div>
 
         <div style={{ display: 'flex', gap: '40px', justifyContent: 'center', flexWrap: 'wrap', color: '#fff', opacity: 0.8, marginBottom: '60px' }}>
@@ -574,7 +602,7 @@ const HomeHero = ({ colors, data, onUpdate, isReadOnly, isMounted }: { colors: a
   );
 };
 
-const WhyAttend = ({ colors, data, onUpdate, isReadOnly }: { colors: any; data: any; onUpdate: any; isReadOnly?: boolean }) => {
+const WhyAttend = ({ colors, data, onUpdate, isReadOnly, isFirst }: { colors: any; data: any; onUpdate: any; isReadOnly?: boolean; isFirst?: boolean }) => {
   const highlights = data?.highlights || [
     { title: 'Expert Speakers', desc: 'Learn from the best in the industry.' },
     { title: 'Hands-on Workshops', desc: 'Practical sessions to sharpen your skills.' },
@@ -588,7 +616,7 @@ const WhyAttend = ({ colors, data, onUpdate, isReadOnly }: { colors: any; data: 
   };
 
   return (
-    <section id="whyattend" style={{ padding: "40px 0", background: colors.white }}>
+    <section id="whyattend" style={{ padding: isFirst ? "0 0 60px 0" : "60px 0", background: colors.white }}>
       <Container>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: '60px', alignItems: "center" }}>
           <div>
@@ -655,7 +683,7 @@ const WhyAttend = ({ colors, data, onUpdate, isReadOnly }: { colors: any; data: 
   );
 };
 
-const Speakers = ({ colors, data, onUpdate, isReadOnly }: { colors: any; data: any; onUpdate: any; isReadOnly?: boolean }) => {
+const Speakers = ({ colors, data, onUpdate, isReadOnly, isFirst }: { colors: any; data: any; onUpdate: any; isReadOnly?: boolean; isFirst?: boolean }) => {
   const items = data?.items || [];
   
   const updateSpeaker = (idx: number, field: string, value: string) => {
@@ -665,7 +693,7 @@ const Speakers = ({ colors, data, onUpdate, isReadOnly }: { colors: any; data: a
   };
 
   return (
-    <section id="speakers" style={{ background: colors.lightBg, padding: "40px 0", textAlign: "center" }}>
+    <section id="speakers" style={{ background: colors.lightBg, padding: isFirst ? "0 0 60px 0" : "60px 0", textAlign: "center" }}>
       <Container>
         <h3 style={{ color: colors.primary, fontSize: '13px', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '10px' }}>Meet Our Experts</h3>
         <EditableText 
@@ -680,27 +708,28 @@ const Speakers = ({ colors, data, onUpdate, isReadOnly }: { colors: any; data: a
         />
         <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: '25px' }}>
           {items.map((sp: any, i: number) => (
-            <div key={i} className="speaker-card" style={{ background: colors.white, padding: '15px', borderRadius: '20px', boxShadow: '0 5px 20px rgba(0,0,0,0.05)', transition: 'all 0.4s ease', textAlign: 'center', width: '100%', maxWidth: '260px' }}>
-              <div style={{ overflow: 'hidden', borderRadius: '15px', height: '240px', marginBottom: '15px', position: 'relative' }}>
-                <EditableImage 
-                  src={sp.image || sp.img || 'https://via.placeholder.com/400x400'} 
+            <div key={i} className="speaker-card" style={{ background: colors.white, padding: '25px', borderRadius: '24px', boxShadow: '0 10px 30px rgba(0,0,0,0.06)', transition: 'all 0.4s ease', textAlign: 'center', width: '100%', maxWidth: '300px' }}>
+              <div style={{ overflow: 'hidden', borderRadius: '20px', height: '320px', marginBottom: '20px', position: 'relative' }}>
+                <EditableImage
+                  src={sp.image || sp.img || 'https://via.placeholder.com/400x400'}
                   isReadOnly={isReadOnly}
                   onUpdate={(val: string) => updateSpeaker(i, 'image', val)}
-                  style={{ width: "100%", height: "100%", objectFit: 'cover', transition: 'transform 0.5s ease' }} 
-                  className="speaker-img" 
+                  style={{ width: "100%", height: "100%", objectFit: 'cover', transition: 'transform 0.5s ease' }}
+                  className="speaker-img"
                 />
               </div>
-              <EditableText 
+              <EditableText
                 tagName="h3" text={sp.name} isReadOnly={isReadOnly}
                 onUpdate={(val: string) => updateSpeaker(i, 'name', val)}
-                style={{ fontSize: '18px', fontWeight: 700, marginBottom: '3px', color: colors.dark2 }}
+                style={{ fontSize: '22px', fontWeight: 800, marginBottom: '6px', color: colors.dark2 }}
               />
               <div style={{ display: 'flex', justifyContent: 'center', gap: '5px', flexWrap: 'wrap' }}>
-                <EditableText 
+                <EditableText
                   tagName="span" text={sp.role} isReadOnly={isReadOnly}
                   onUpdate={(val: string) => updateSpeaker(i, 'role', val)}
-                  style={{ color: colors.primary, fontSize: '13px', fontWeight: 700, textTransform: 'uppercase' }}
+                  style={{ color: colors.primary, fontSize: '14px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}
                 />
+
                 {sp.company && <span style={{ color: colors.textGrey, fontSize: '13px' }}>@</span>}
                 <EditableText 
                   tagName="span" text={sp.company || ''} isReadOnly={isReadOnly}
@@ -716,7 +745,7 @@ const Speakers = ({ colors, data, onUpdate, isReadOnly }: { colors: any; data: a
   );
 };
 
-const Sessions = ({ colors, data, onUpdate, isReadOnly }: { colors: any; data: any; onUpdate: any; isReadOnly?: boolean }) => {
+const Sessions = ({ colors, data, onUpdate, isReadOnly, isFirst }: { colors: any; data: any; onUpdate: any; isReadOnly?: boolean; isFirst?: boolean }) => {
   const items = data?.items || [];
   
   const updateSession = (idx: number, field: string, value: string) => {
@@ -726,7 +755,7 @@ const Sessions = ({ colors, data, onUpdate, isReadOnly }: { colors: any; data: a
   };
 
   return (
-    <section id="sessions" style={{ padding: "40px 0", background: colors.white }}>
+    <section id="sessions" style={{ padding: isFirst ? "0 0 60px 0" : "60px 0", background: colors.white }}>
       <Container>
         <h3 style={{ color: colors.primary, fontSize: '13px', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '10px', textAlign: 'center' }}>Event Schedule</h3>
         <EditableText 
@@ -775,13 +804,12 @@ const Sessions = ({ colors, data, onUpdate, isReadOnly }: { colors: any; data: a
   );
 };
 
-const Venue = ({ colors, data, onUpdate, isReadOnly }: { colors: any; data: any; onUpdate: any; isReadOnly?: boolean }) => {
+const Venue = ({ colors, data, onUpdate, isReadOnly, isFirst }: { colors: any; data: any; onUpdate: any; isReadOnly?: boolean; isFirst?: boolean }) => {
   const bgImg = data?.backgroundImage || '';
   
   return (
     <section id="venue" style={{
-      padding: "20px 0"
-, color: colors.white,
+      padding: isFirst ? "0 0 60px 0" : "60px 0", color: colors.white,
       background: bgImg ? `linear-gradient(rgba(0,0,0,0.7),rgba(0,0,0,0.7)), url('${bgImg}') center/cover no-repeat fixed` : colors.dark,
       position: 'relative'
     }}>
@@ -856,7 +884,7 @@ const Venue = ({ colors, data, onUpdate, isReadOnly }: { colors: any; data: any;
   );
 };
 
-const Gallery = ({ colors, data, onUpdate, isReadOnly }: { colors: any; data: any; onUpdate: any; isReadOnly?: boolean }) => {
+const Gallery = ({ colors, data, onUpdate, isReadOnly, isFirst }: { colors: any; data: any; onUpdate: any; isReadOnly?: boolean; isFirst?: boolean }) => {
   const items = data?.items || [
     { image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800' },
     { image: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=800' },
@@ -871,7 +899,7 @@ const Gallery = ({ colors, data, onUpdate, isReadOnly }: { colors: any; data: an
   };
 
   return (
-    <section id="gallery" style={{ padding: "40px 0", background: colors.lightBg }}>
+    <section id="gallery" style={{ padding: isFirst ? "0 0 60px 0" : "60px 0", background: colors.lightBg }}>
       <Container>
         <h3 style={{ color: colors.primary, fontSize: '14px', fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '15px', textAlign: 'center' }}>Moments</h3>
         <h2 style={{ fontSize: '36px', fontWeight: 800, textTransform: "uppercase", textAlign: "center", marginBottom: '40px', color: colors.dark2 }}>Event Gallery</h2>
@@ -892,12 +920,12 @@ const Gallery = ({ colors, data, onUpdate, isReadOnly }: { colors: any; data: an
   );
 };
 
-const Contact = ({ colors, data, onUpdate, isReadOnly }: { colors: any; data: any; onUpdate: any; isReadOnly?: boolean }) => {
+const Contact = ({ colors, data, onUpdate, isReadOnly, isFirst }: { colors: any; data: any; onUpdate: any; isReadOnly?: boolean; isFirst?: boolean }) => {
   const bgImg = data?.backgroundImage || '';
 
   return (
     <section id="contact" style={{ 
-      padding: "20px 0"
+      padding: isFirst ? "0 0 60px 0" : "60px 0"
 , 
       background: bgImg ? `linear-gradient(rgba(0,0,0,0.7),rgba(0,0,0,0.7)), url('${bgImg}') center/cover no-repeat fixed` : colors.navbar, 
       color: colors.navbarText,
@@ -985,6 +1013,8 @@ const btnBase: React.CSSProperties = {
 
 import GetInTouchSection from './GetInTouchSection';
 import Footer from '../Footer';
+import FeaturedSessions from './FeaturedSessions';
+import SponsorsSection from './SponsorsSection';
 
 import { 
   MediaTextSection, 
@@ -995,10 +1025,11 @@ import {
   TextSection, 
   ListSection, 
   EmbedWidgetSection,
-  SponsorsSection,
   SponsorCategorySection,
   FloorPlanSection,
-  CustomHTMLSection
+  CustomHTMLSection,
+  MovingLineSection,
+  GallerySection
 } from './ContentSections';
 
 // ─── Main Component ───────────────────────────────────────────────────────────
@@ -1037,9 +1068,10 @@ export default function ThemeOne({
       case 'HERO': SectionComponent = HomeHero; settingsMode = 'HERO'; break;
       case 'WHY_ATTEND': SectionComponent = WhyAttend; settingsMode = 'SECTION'; break;
       case 'SPEAKERS': SectionComponent = Speakers; settingsMode = 'SPEAKER'; break;
-      case 'SESSIONS': 
-      case 'AGENDA': SectionComponent = Sessions; settingsMode = 'AGENDA'; break;
-      case 'GALLERY': SectionComponent = Gallery; settingsMode = 'SECTION'; break;
+      case 'SESSIONS': SectionComponent = FeaturedSessions; settingsMode = 'AGENDA'; break;
+      case 'AGENDA': 
+      case 'SCHEDULE': SectionComponent = Sessions; settingsMode = 'AGENDA'; break;
+      case 'GALLERY': SectionComponent = GallerySection; isThemed = false; break;
       case 'VENUE': SectionComponent = Venue; settingsMode = 'VENUE'; break;
       case 'GET_IN_TOUCH': 
       case 'CONTACT': SectionComponent = Contact; settingsMode = 'SECTION'; break;
@@ -1053,10 +1085,11 @@ export default function ThemeOne({
       case 'TEXT': SectionComponent = TextSection; isThemed = false; break;
       case 'LIST': SectionComponent = ListSection; isThemed = false; break;
       case 'WIDGET': SectionComponent = EmbedWidgetSection; isThemed = false; break;
-      case 'SPONSOR': SectionComponent = SponsorsSection; isThemed = false; break;
-      case 'SPONSOR_CATEGORY': SectionComponent = SponsorCategorySection; isThemed = false; break;
+      case 'SPONSOR': 
+      case 'SPONSOR_CATEGORY': SectionComponent = SponsorsSection; settingsMode = 'SPONSOR'; break;
       case 'FLOOR_PLAN': SectionComponent = FloorPlanSection; isThemed = false; break;
       case 'CUSTOM_HTML': SectionComponent = CustomHTMLSection; isThemed = false; break;
+      case 'MOVING_LINE': SectionComponent = MovingLineSection; isThemed = false; break;
       default: 
         SectionComponent = TextSection; 
         isThemed = false;
@@ -1103,6 +1136,7 @@ export default function ThemeOne({
           data={section.data}
           isReadOnly={isReadOnly}
           isMounted={isMounted}
+          isFirst={isFirst}
           onUpdate={(newData: any) => onUpdateSection?.(section.id, newData)}
         />
       </ThemeSectionWrapper>
@@ -1116,7 +1150,8 @@ export default function ThemeOne({
         fontFamily: themeConfig?.fontFamily || "'Inter', sans-serif", 
         background: colors.white, 
         scrollBehavior: 'smooth',
-        '--primary': colors.primary
+        '--primary': colors.primary,
+        overflowX: 'hidden'
       } as any}
     >
       {/* Font Injections */}
@@ -1231,20 +1266,27 @@ export default function ThemeOne({
           .countdown-container {
             display: flex !important;
             flex-direction: row !important;
-            flex-wrap: nowrap !important;
-            gap: 10px !important;
+            flex-wrap: wrap !important;
+            gap: 8px !important;
             justify-content: center !important;
+            width: 100% !important;
+            margin-top: 30px !important;
           }
-          .countdown-container div[style*="min-width: 90px"] {
-            min-width: 65px !important;
-            padding: 8px !important;
+          .countdown-container > div {
+            min-width: 70px !important;
+            padding: 12px 8px !important;
             border-radius: 12px !important;
+            flex: 1 !important;
+            max-width: 85px !important;
           }
-          .countdown-container span[style*="font-size: 42px"] {
+          .countdown-container span:first-child {
             font-size: 24px !important;
+            letter-spacing: -1px !important;
           }
-          .countdown-container span[style*="font-size: 11px"] {
+          .countdown-container span:last-child {
             font-size: 9px !important;
+            letter-spacing: 1px !important;
+            margin-top: 6px !important;
           }
           .opacity-0.group-hover\\:opacity-100 {
             opacity: 1 !important;
@@ -1273,11 +1315,20 @@ export default function ThemeOne({
           #home { 
             height: auto !important; 
             min-height: 100vh !important; 
-            padding: 120px 20px 60px !important;
+            padding: 120px 0 60px !important;
             display: flex !important;
             flex-direction: column !important;
             justify-content: center !important;
             align-items: center !important;
+          }
+
+          #home .theme-container {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            text-align: center !important;
+            width: 100% !important;
+            max-width: 100% !important;
           }
 
           #home div[style*="display: flex"][style*="gap: 20px"] {
@@ -1469,13 +1520,30 @@ export default function ThemeOne({
           justify-content: center !important;
         }
 
-        .is-mobile-preview .countdown-container div[style*="min-width: 90px"] {
-          min-width: 70px !important;
-          padding: 10px !important;
+        .is-mobile-preview .countdown-container {
+          display: flex !important;
+          flex-direction: row !important;
+          flex-wrap: wrap !important;
+          gap: 8px !important;
+          justify-content: center !important;
+          width: 100% !important;
+          margin-top: 30px !important;
         }
-
-        .is-mobile-preview .countdown-container span[style*="font-size: 42px"] {
-          font-size: 28px !important;
+        .is-mobile-preview .countdown-container > div {
+          min-width: 70px !important;
+          padding: 12px 8px !important;
+          border-radius: 12px !important;
+          flex: 1 !important;
+          max-width: 85px !important;
+        }
+        .is-mobile-preview .countdown-container span:first-child {
+          font-size: 24px !important;
+          letter-spacing: -1px !important;
+        }
+        .is-mobile-preview .countdown-container span:last-child {
+          font-size: 9px !important;
+          letter-spacing: 1px !important;
+          margin-top: 6px !important;
         }
 
         @media (max-width: 480px) {

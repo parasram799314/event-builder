@@ -12,16 +12,19 @@ import {
   TextSection, 
   ListSection, 
   EmbedWidgetSection,
-  SponsorsSection,
   SponsorCategorySection,
   FloorPlanSection,
-  CustomHTMLSection
+  CustomHTMLSection,
+  MovingLineSection,
+  GallerySection
 } from './ContentSections';
 
 import EditToolbar from './EditToolbar';
 import SettingsPanel, { SettingsMode } from './SettingsPanel';
 import ButtonEditorModal from './ButtonEditorModal';
 import Footer from '../Footer';
+import FeaturedSessions from './FeaturedSessions';
+import SponsorsSection from './SponsorsSection';
 
 const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
 
@@ -61,7 +64,8 @@ const ThemeSectionWrapper = ({
   const showControlsClass = forceMobile ? "opacity-100" : "opacity-0 group-hover:opacity-100";
 
   return (
-    <div className={`group relative border-y-2 border-transparent hover:border-indigo-500/50 transition-all duration-300 my-2 ${forceMobile ? 'is-mobile-editor' : ''}`}>
+    <div className={`group relative border-y-2 border-transparent hover:border-blue-500/50 transition-all duration-300 ${isFirst ? 'mb-2' : 'my-2'} ${forceMobile ? 'is-mobile-editor' : ''}`}>
+
       {/* Add Section Button Above */}
       {isFirst && (
         <div className={`absolute top-0 left-0 right-0 -translate-y-1/2 flex items-center justify-center transition-all z-[9999] h-10 pointer-events-none ${showControlsClass}`}>
@@ -484,7 +488,7 @@ const Container = ({ children, style }: { children: React.ReactNode; style?: Rea
   <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 30px", ...style }}>{children}</div>
 );
 
-const Hero = ({ colors, data, onUpdate, isReadOnly, isMounted }: { colors: any; data: any; onUpdate: any; isReadOnly?: boolean; isMounted: boolean }) => {
+const Hero = ({ colors, data, onUpdate, isReadOnly, isMounted, isFirst }: { colors: any; data: any; onUpdate: any; isReadOnly?: boolean; isMounted: boolean; isFirst?: boolean }) => {
   const heroImage = data?.slides?.[0]?.images?.[0] || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1600';
   
   const formatDate = (dateStr: string) => {
@@ -502,6 +506,7 @@ const Hero = ({ colors, data, onUpdate, isReadOnly, isMounted }: { colors: any; 
     <section id="home" className="hero-section" style={{
       background: colors.background,
       minHeight: "70vh", display: "flex", position: 'relative', overflow: 'hidden',
+      paddingTop: isFirst ? '0' : undefined
     }}>
       {/* Subtle Background Pattern for text area */}
       <div className="hero-pattern" style={{ 
@@ -596,7 +601,7 @@ const Hero = ({ colors, data, onUpdate, isReadOnly, isMounted }: { colors: any; 
   );
 };
 
-const About = ({ colors, data, onUpdate, isReadOnly }: any) => {
+const About = ({ colors, data, onUpdate, isReadOnly, isFirst }: any) => {
   const highlights = data?.highlights || [
     { title: 'Global Vision', desc: 'Connect with a worldwide community of innovators.' },
     { title: 'Strategic Growth', desc: 'Identify new opportunities for expansion.' }
@@ -605,7 +610,7 @@ const About = ({ colors, data, onUpdate, isReadOnly }: any) => {
   const vPadding = data?.verticalPadding !== undefined ? `${data.verticalPadding}px` : '40px';
 
   return (
-    <section id="about" style={{ padding: `${vPadding} 0`, background: colors.white }}>
+    <section id="about" style={{ padding: `${isFirst ? '0' : vPadding} 0`, background: colors.white }}>
       <Container>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '120px', alignItems: 'center' }}>
           <div style={{ position: 'relative' }}>
@@ -667,7 +672,7 @@ const About = ({ colors, data, onUpdate, isReadOnly }: any) => {
   );
 };
 
-const Speakers = ({ colors, data, onUpdate, isReadOnly }: any) => {
+const Speakers = ({ colors, data, onUpdate, isReadOnly, isFirst }: any) => {
   const items = data?.items || [
     { name: 'Sarah Johnson', role: 'CEO, TechFlow', image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400' },
     { name: 'Michael Chen', role: 'Lead Architect, Google', image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400' }
@@ -692,7 +697,7 @@ const Speakers = ({ colors, data, onUpdate, isReadOnly }: any) => {
   };
 
   return (
-    <section id="speakers" style={{ padding: `${vPadding} 0`, background: colors.surface }}>
+    <section id="speakers" style={{ padding: `${isFirst ? '0' : vPadding} 0`, background: colors.surface }}>
       <Container>
         <div style={{ textAlign: 'center', marginBottom: '100px' }}>
             <span style={{ fontSize: '13px', fontWeight: 700, letterSpacing: '8px', textTransform: 'uppercase', color: colors.primary, display: 'block', marginBottom: '24px' }}>The Lineup</span>
@@ -782,7 +787,7 @@ const premiumSocialBtn: React.CSSProperties = {
   width: '40px', height: '40px', borderRadius: '12px', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b', fontSize: '16px', textDecoration: 'none', transition: '0.3s', border: '1px solid #e2e8f0'
 };
 
-const Schedule = ({ colors, data, onUpdate, isReadOnly }: any) => {
+const Schedule = ({ colors, data, onUpdate, isReadOnly, isFirst }: any) => {
   const items = data?.items || [];
   const vPadding = data?.verticalPadding !== undefined ? `${data.verticalPadding}px` : '100px';
 
@@ -793,7 +798,7 @@ const Schedule = ({ colors, data, onUpdate, isReadOnly }: any) => {
   };
 
   return (
-    <section id="schedule" style={{ padding: `${vPadding} 0`, background: colors.white }}>
+    <section id="schedule" style={{ padding: `${isFirst ? '0' : vPadding} 0`, background: colors.white }}>
       <Container>
         <div style={{ textAlign: 'center', marginBottom: '100px' }}>
            <h2 style={{ fontSize: '64px', fontWeight: 800, fontFamily: "inherit", letterSpacing: '-2px' }}>The Agenda</h2>
@@ -862,7 +867,7 @@ const Schedule = ({ colors, data, onUpdate, isReadOnly }: any) => {
   );
 };
 
-const Gallery = ({ colors, data, onUpdate, isReadOnly }: any) => {
+const Gallery = ({ colors, data, onUpdate, isReadOnly, isFirst }: any) => {
   const items = data?.items || [
     { image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800' },
     { image: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=800' },
@@ -873,7 +878,7 @@ const Gallery = ({ colors, data, onUpdate, isReadOnly }: any) => {
   const vPadding = data?.verticalPadding !== undefined ? `${data.verticalPadding}px` : '40px';
 
   return (
-    <section id="gallery" style={{ padding: `${vPadding} 0`, background: colors.background }}>
+    <section id="gallery" style={{ padding: `${isFirst ? '0' : vPadding} 0`, background: colors.background }}>
       <Container>
         <div style={{ textAlign: 'center', marginBottom: '80px' }}>
           <span style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '6px', textTransform: 'uppercase', color: colors.primary, display: 'block', marginBottom: '20px' }}>Moments</span>
@@ -901,13 +906,13 @@ const Gallery = ({ colors, data, onUpdate, isReadOnly }: any) => {
   );
 };
 
-const Venue = ({ colors, data, onUpdate, isReadOnly }: any) => {
+const Venue = ({ colors, data, onUpdate, isReadOnly, isFirst }: any) => {
   const bgImg = data?.backgroundImage || '';
   const vPadding = data?.verticalPadding !== undefined ? `${data.verticalPadding}px` : '40px';
 
   return (
     <section id="venue" style={{ 
-      padding: `${vPadding} 0`, 
+      padding: `${isFirst ? '0' : vPadding} 0`, 
       background: bgImg ? `linear-gradient(rgba(0,0,0,0.75),rgba(0,0,0,0.75)), url('${bgImg}') center/cover no-repeat fixed` : colors.background, 
       position: 'relative' 
     }}>
@@ -992,13 +997,13 @@ const Venue = ({ colors, data, onUpdate, isReadOnly }: any) => {
   );
 };
 
-const Contact = ({ colors, data, onUpdate, isReadOnly }: any) => {
+const Contact = ({ colors, data, onUpdate, isReadOnly, isFirst }: any) => {
   const bgImg = data?.backgroundImage || '';
   const vPadding = data?.verticalPadding !== undefined ? `${data.verticalPadding}px` : '40px';
 
   return (
     <section id="contact" style={{ 
-      padding: `${vPadding} 0`, 
+      padding: `${isFirst ? '0' : vPadding} 0`, 
       background: bgImg ? `linear-gradient(rgba(0,0,0,0.85),rgba(0,0,0,0.85)), url('${bgImg}') center/cover no-repeat fixed` : colors.text, 
       color: colors.white,
       position: 'relative'
@@ -1116,9 +1121,10 @@ export default function ThemeTwo({
       case 'HERO': SectionComponent = Hero; settingsMode = 'HERO'; break;
       case 'WHY_ATTEND': SectionComponent = About; settingsMode = 'SECTION'; break;
       case 'SPEAKERS': SectionComponent = Speakers; settingsMode = 'SPEAKER'; break;
-      case 'SESSIONS': 
-      case 'AGENDA': SectionComponent = Schedule; settingsMode = 'AGENDA'; break;
-      case 'GALLERY': SectionComponent = Gallery; settingsMode = 'SECTION'; break;
+      case 'SESSIONS': SectionComponent = FeaturedSessions; settingsMode = 'AGENDA'; break;
+      case 'AGENDA': 
+      case 'SCHEDULE': SectionComponent = Schedule; settingsMode = 'AGENDA'; break;
+      case 'GALLERY': SectionComponent = GallerySection; isThemed = false; break;
       case 'VENUE': SectionComponent = Venue; settingsMode = 'VENUE'; break;
       case 'GET_IN_TOUCH':
       case 'CONTACT': SectionComponent = Contact; settingsMode = 'SECTION'; break;
@@ -1132,10 +1138,11 @@ export default function ThemeTwo({
       case 'TEXT': SectionComponent = TextSection; isThemed = false; break;
       case 'LIST': SectionComponent = ListSection; isThemed = false; break;
       case 'WIDGET': SectionComponent = EmbedWidgetSection; isThemed = false; break;
-      case 'SPONSOR': SectionComponent = SponsorsSection; isThemed = false; break;
-      case 'SPONSOR_CATEGORY': SectionComponent = SponsorCategorySection; isThemed = false; break;
+      case 'SPONSOR': 
+      case 'SPONSOR_CATEGORY': SectionComponent = SponsorsSection; settingsMode = 'SPONSOR'; break;
       case 'FLOOR_PLAN': SectionComponent = FloorPlanSection; isThemed = false; break;
       case 'CUSTOM_HTML': SectionComponent = CustomHTMLSection; isThemed = false; break;
+      case 'MOVING_LINE': SectionComponent = MovingLineSection; isThemed = false; break;
       default: 
         SectionComponent = TextSection; 
         isThemed = false;
@@ -1184,6 +1191,7 @@ export default function ThemeTwo({
           data={section.data}
           isReadOnly={isReadOnly}
           isMounted={isMounted}
+          isFirst={isFirst}
           onUpdate={(newData: any) => onUpdateSection?.(section.id, newData)}
         />
       </ThemeSectionWrapper>

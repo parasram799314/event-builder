@@ -219,6 +219,34 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
         <label className={styles.label}>Target Date & Time</label>
         <input type="datetime-local" className={styles.select} value={data.targetDate || ''} onChange={(e) => updateData({ ...data, targetDate: e.target.value })} />
       </div>
+      <div className={styles.section}>
+        <label className={styles.label}>Background Image</label>
+        <div 
+          className={styles.imageUploadBox}
+          style={{ border: '2px dashed #e2e8f0', borderRadius: '12px', height: '120px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', overflow: 'hidden', backgroundColor: '#f8fafc' }}
+          onClick={() => document.getElementById('countdown-bg-input')?.click()}
+        >
+          <input 
+            type="file" id="countdown-bg-input" style={{ display: 'none' }} accept="image/*" 
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                const reader = new FileReader();
+                reader.onloadend = () => updateData({ ...data, backgroundImage: reader.result as string });
+                reader.readAsDataURL(file);
+              }
+            }} 
+          />
+          {data.backgroundImage ? (
+            <img src={data.backgroundImage} alt="Background" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          ) : (
+            <div style={{ textAlign: 'center', color: '#94a3b8' }}>
+              <i className="fas fa-image" style={{ fontSize: '24px', marginBottom: '8px', display: 'block' }}></i>
+              <span>Upload Background</span>
+            </div>
+          )}
+        </div>
+      </div>
     </>
   );
 
@@ -561,6 +589,68 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
             }}
             style={{ width: '100%' }}
           />
+        </div>
+
+        <div className={styles.section} style={{ background: '#f8fafc', padding: '15px', borderRadius: '12px', border: '1px solid #e2e8f0', marginBottom: '15px' }}>
+          <label className={styles.label} style={{ color: '#2563eb', fontSize: '12px', fontWeight: 800 }}>PRIMARY BUTTON</label>
+          <div style={{ display: 'grid', gap: '10px' }}>
+            <div>
+              <label style={{ fontSize: '10px', color: '#64748b', textTransform: 'uppercase', fontWeight: 600 }}>Button Label</label>
+              <input 
+                type="text" className={styles.select} style={{ marginBottom: '8px' }}
+                value={currentSlide.primaryBtnLabel || 'REGISTER NOW'} 
+                onChange={(e) => {
+                  const newSlides = [...data.slides];
+                  newSlides[data.currentSlideIndex || 0].primaryBtnLabel = e.target.value;
+                  updateData({ ...data, slides: newSlides });
+                }} 
+              />
+            </div>
+            <div>
+              <label style={{ fontSize: '10px', color: '#64748b', textTransform: 'uppercase', fontWeight: 600 }}>Link URL (https://...)</label>
+              <input 
+                type="text" className={styles.select} style={{ marginBottom: 0 }}
+                placeholder="https://event.com/register"
+                value={currentSlide.primaryBtnLink || ''} 
+                onChange={(e) => {
+                  const newSlides = [...data.slides];
+                  newSlides[data.currentSlideIndex || 0].primaryBtnLink = e.target.value;
+                  updateData({ ...data, slides: newSlides });
+                }} 
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className={styles.section} style={{ background: '#f8fafc', padding: '15px', borderRadius: '12px', border: '1px solid #e2e8f0', marginBottom: '15px' }}>
+          <label className={styles.label} style={{ color: '#64748b', fontSize: '12px', fontWeight: 800 }}>SECONDARY BUTTON</label>
+          <div style={{ display: 'grid', gap: '10px' }}>
+            <div>
+              <label style={{ fontSize: '10px', color: '#64748b', textTransform: 'uppercase', fontWeight: 600 }}>Button Label</label>
+              <input 
+                type="text" className={styles.select} style={{ marginBottom: '8px' }}
+                value={currentSlide.secondaryBtnLabel || 'VIEW AGENDA'} 
+                onChange={(e) => {
+                  const newSlides = [...data.slides];
+                  newSlides[data.currentSlideIndex || 0].secondaryBtnLabel = e.target.value;
+                  updateData({ ...data, slides: newSlides });
+                }} 
+              />
+            </div>
+            <div>
+              <label style={{ fontSize: '10px', color: '#64748b', textTransform: 'uppercase', fontWeight: 600 }}>Link URL (https://...)</label>
+              <input 
+                type="text" className={styles.select} style={{ marginBottom: 0 }}
+                placeholder="https://event.com/agenda"
+                value={currentSlide.secondaryBtnLink || ''} 
+                onChange={(e) => {
+                  const newSlides = [...data.slides];
+                  newSlides[data.currentSlideIndex || 0].secondaryBtnLink = e.target.value;
+                  updateData({ ...data, slides: newSlides });
+                }} 
+              />
+            </div>
+          </div>
         </div>
 
         <div className={styles.section}>

@@ -4,8 +4,25 @@ import React, { useState, useEffect } from "react";
 import GoogleMapDisplay from './GoogleMapDisplay';
 
 const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
-import EditToolbar from './EditToolbar';
 import SettingsPanel, { SettingsMode } from './SettingsPanel';
+import FeaturedSessions from './FeaturedSessions';
+import SponsorsSection from './SponsorsSection';
+
+import { 
+  MediaTextSection, 
+  MediaGroupSection, 
+  NumberCounterSection, 
+  TestimonialsSection, 
+  CountdownSection, 
+  TextSection, 
+  ListSection, 
+  EmbedWidgetSection,
+  SponsorCategorySection,
+  FloorPlanSection,
+  CustomHTMLSection,
+  MovingLineSection,
+  GallerySection
+} from './ContentSections';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const formatDate = (dateStr: string) => {
@@ -59,7 +76,7 @@ const ThemeSectionWrapper = ({
   const showControlsClass = forceMobile ? "opacity-100" : "opacity-0 group-hover:opacity-100";
 
   return (
-    <div className={`group relative border-y-2 border-transparent hover:border-purple-500/50 transition-all duration-300 my-2 ${forceMobile ? 'is-mobile-editor' : ''}`}>
+    <div className={`group relative border-y-2 border-transparent hover:border-purple-500/50 transition-all duration-300 ${isFirst ? 'mb-2' : 'my-2'} ${forceMobile ? 'is-mobile-editor' : ''}`}>
       {/* Add Section Button Above */}
       {isFirst && (
         <div className={`absolute top-0 left-0 right-0 -translate-y-1/2 flex items-center justify-center transition-all z-[9999] h-10 pointer-events-none ${showControlsClass}`}>
@@ -318,12 +335,13 @@ const Navbar = ({ primaryColor, isReadOnly, logo, profiles, onTabChange, section
 };
 
 // ─── Hero ───────────────────────────────────────────────────────────────────
-const Hero = ({ colors, data, onUpdate, isReadOnly }: any) => {
+const Hero = ({ colors, data, onUpdate, isReadOnly, isFirst }: any) => {
   const slide = data?.slides?.[0] || {};
   return (
     <section style={{
       height: "70vh", background: "#020617", position: 'relative', overflow: 'hidden',
-      display: 'flex', alignItems: 'center'
+      display: 'flex', alignItems: 'center',
+      paddingTop: isFirst ? '0' : undefined
     }}>
       <div style={{
         position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
@@ -336,13 +354,25 @@ const Hero = ({ colors, data, onUpdate, isReadOnly }: any) => {
         <p style={{ fontSize: '20px', color: '#94a3b8', maxWidth: '700px', margin: '0 auto 48px', lineHeight: 1.6 }}>
           {slide.subtitle}
         </p>
-        <button style={{
-          background: colors.primary, color: '#fff', border: 'none', padding: '18px 48px',
-          borderRadius: '12px', fontWeight: 800, fontSize: '16px', cursor: 'pointer',
-          boxShadow: `0 20px 40px ${colors.primary}40`, transition: 'all 0.3s'
-        }}>
-          JOIN THE FUTURE
-        </button>
+        {slide.primaryBtnLink ? (
+          <a href={slide.primaryBtnLink} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+            <button style={{
+              background: colors.primary, color: '#fff', border: 'none', padding: '18px 48px',
+              borderRadius: '12px', fontWeight: 800, fontSize: '16px', cursor: 'pointer',
+              boxShadow: `0 20px 40px ${colors.primary}40`, transition: 'all 0.3s'
+            }}>
+              {slide.primaryBtnLabel || 'JOIN THE FUTURE'}
+            </button>
+          </a>
+        ) : (
+          <button style={{
+            background: colors.primary, color: '#fff', border: 'none', padding: '18px 48px',
+            borderRadius: '12px', fontWeight: 800, fontSize: '16px', cursor: 'pointer',
+            boxShadow: `0 20px 40px ${colors.primary}40`, transition: 'all 0.3s'
+          }}>
+            {slide.primaryBtnLabel || 'JOIN THE FUTURE'}
+          </button>
+        )}
       </div>
     </section>
   );
@@ -356,8 +386,8 @@ const SectionTitle = ({ title, subtitle, colors }: any) => (
   </div>
 );
 
-const Speakers = ({ colors, data }: any) => (
-  <section id="speakers" style={{ background: '#020617', padding: '40px 0' }}>
+const Speakers = ({ colors, data, isFirst }: any) => (
+  <section id="speakers" style={{ background: '#020617', padding: isFirst ? '0 0 40px 0' : '40px 0' }}>
     <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
       <SectionTitle title="Visionary Minds" subtitle="Speakers" colors={colors} />
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '40px' }}>
@@ -373,8 +403,8 @@ const Speakers = ({ colors, data }: any) => (
   </section>
 );
 
-const Venue = ({ colors, data }: any) => (
-  <section id="venue" style={{ background: '#020617', padding: '40px 0' }}>
+const Venue = ({ colors, data, isFirst }: any) => (
+  <section id="venue" style={{ background: '#020617', padding: isFirst ? '0 0 40px 0' : '40px 0' }}>
     <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", display: 'flex', gap: '80px', alignItems: 'center' }} className="flex-col lg:flex-row">
       <div style={{ flex: 1 }}>
         <SectionTitle title={data.name} subtitle="The Venue" colors={colors} />
@@ -404,17 +434,23 @@ export default function ThemeThree({ data, themeConfig, isReadOnly, onUpdateSect
   const sections = data?.sections || [];
 
   return (
-    <div style={{ background: colors.background, color: colors.text, minHeight: '100vh', fontFamily: "'Inter', sans-serif" }} className={forceMobile ? "is-mobile-preview" : ""}>
+    <div style={{ background: colors.background, color: colors.text, minHeight: '100vh', fontFamily: themeConfig?.fontFamily || "'Inter', sans-serif" }} className={forceMobile ? "is-mobile-preview" : ""}>
       <Navbar primaryColor={colors.primary} isReadOnly={isReadOnly} profiles={profiles} onTabChange={onTabChange} sections={sections} />
 
       {sections.map((section: any, index: number) => {
         let content = null;
+        const isFirst = index === 0;
+        const isLast = index === sections.length - 1;
         switch (section.type) {
-          case 'HERO': content = <Hero colors={colors} data={section.data} onUpdate={(d: any) => onUpdateSection?.(section.id, d)} isReadOnly={isReadOnly} />; break;
-          case 'SPEAKERS': content = <Speakers colors={colors} data={section.data} isReadOnly={isReadOnly} />; break;
-          case 'VENUE': content = <Venue colors={colors} data={section.data} isReadOnly={isReadOnly} />; break;
+          case 'HERO': content = <Hero colors={colors} data={section.data} onUpdate={(d: any) => onUpdateSection?.(section.id, d)} isReadOnly={isReadOnly} isFirst={isFirst} />; break;
+          case 'SPEAKERS': content = <Speakers colors={colors} data={section.data} isReadOnly={isReadOnly} isFirst={isFirst} />; break;
+          case 'VENUE': content = <Venue colors={colors} data={section.data} isReadOnly={isReadOnly} isFirst={isFirst} />; break;
+          case 'GALLERY': content = <GallerySection {...{ index, isReadOnly, isFirst, isLast }} themeConfig={{ primaryColor: colors.primary, backgroundColor: colors.background, textColor: colors.text }} data={section.data} updateData={(newData: any) => onUpdateSection?.(section.id, newData)} onMoveUp={() => onMoveUp?.(index)} onMoveDown={() => onMoveDown?.(index)} onDelete={() => onDelete?.(index)} onAddSection={() => onAddClick?.(index)} onAddSectionBelow={() => onAddClick?.(index + 1)} />; break;
+          case 'SESSIONS': content = <FeaturedSessions colors={colors} data={section.data} isReadOnly={isReadOnly} onUpdate={(d: any) => onUpdateSection?.(section.id, d)} />; break;
+          case 'SPONSOR':
+          case 'SPONSOR_CATEGORY': content = <SponsorsSection colors={colors} data={section.data} isReadOnly={isReadOnly} onUpdate={(d: any) => onUpdateSection?.(section.id, d)} />; break;
           case 'AGENDA':
-          case 'SESSIONS': content = <div id="sessions"><Speakers colors={colors} data={{...section.data, title: 'Agenda', items: section.data.items?.map((i:any)=>({...i, name: i.title, role: i.time, image: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=400'}))}} isReadOnly={isReadOnly} /></div>; break;
+          case 'SCHEDULE': content = <div id="sessions"><Speakers colors={colors} data={{...section.data, title: 'Agenda', items: section.data.items?.map((i:any)=>({...i, name: i.title, role: i.time, image: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=400'}))}} isReadOnly={isReadOnly} /></div>; break;
           case 'CONTACT':
           case 'GET_IN_TOUCH': content = <div id="contact"><Venue colors={colors} data={{...section.data, name: 'Contact Us', address: section.data.email || 'contact@event.com'}} isReadOnly={isReadOnly} /></div>; break;
           default: content = <div id={section.type.toLowerCase().replace(/_/g, '')} style={{ padding: '40px 24px', textAlign: 'center', background: '#0f172a', color: '#64748b', borderBottom: '1px solid #1e293b' }}>{section.type} Section</div>;

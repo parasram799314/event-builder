@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import SectionWrapper from './SectionWrapper';
 import EditToolbar from './EditToolbar';
 import ButtonEditorModal from './ButtonEditorModal';
@@ -255,18 +255,18 @@ export const NumberCounterSection: React.FC<ContentSectionProps> = (props) => {
         <div className={styles.counterGrid}>
            {sectionData.items.map((item: any, i: number) => (
              <div key={i} style={{ textAlign: 'center', minWidth: '120px' }}>
-                <div 
+                <div
                   style={{ fontSize: '48px', fontWeight: 800 }}
-                  contentEditable={!props.isReadOnly} 
-                  suppressContentEditableWarning 
+                  contentEditable={!props.isReadOnly}
+                  suppressContentEditableWarning
                   onBlur={(e) => updateItem(i, 'value', e.target.innerText)}
                 >
                   {item.value}
                 </div>
-                <div 
+                <div
                   style={{ fontSize: '14px', opacity: 0.8 }}
-                  contentEditable={!props.isReadOnly} 
-                  suppressContentEditableWarning 
+                  contentEditable={!props.isReadOnly}
+                  suppressContentEditableWarning
                   onBlur={(e) => updateItem(i, 'label', e.target.innerText)}
                 >
                   {item.label}
@@ -346,30 +346,101 @@ export const CountdownSection: React.FC<ContentSectionProps> = (props) => {
   const sectionData = {
     ...props.data,
     title: props.data?.title || 'THE EVENT STARTS IN',
-    targetDate: props.data?.targetDate || '2026-10-15T09:00'
+    targetDate: props.data?.targetDate || '2026-10-15T09:00',
+    backgroundImage: props.data?.backgroundImage || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1600'
   };
+
+  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+
+  useEffect(() => {
+    const calculateTime = () => {
+      const target = new Date(sectionData.targetDate).getTime();
+      const now = new Date().getTime();
+      const difference = target - now;
+
+      if (difference > 0) {
+        setTimeLeft({
+          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+          hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+          minutes: Math.floor((difference / 1000 / 60) % 60),
+          seconds: Math.floor((difference / 1000) % 60)
+        });
+      } else {
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+      }
+    };
+
+    calculateTime();
+    const timer = setInterval(calculateTime, 1000);
+    return () => clearInterval(timer);
+  }, [sectionData.targetDate]);
+
+  const primaryColor = props.themeConfig?.primaryColor || '#ff6b00';
 
   return (
     <SectionWrapper {...props} themeConfig={props.themeConfig} data={sectionData} onSettingsClick={() => setIsSidebarOpen(true)}>
       {!props.isReadOnly && (
         <SettingsPanel isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} mode="COUNTDOWN" data={sectionData} updateData={props.updateData!} />
       )}
-      <div className={`${styles.responsivePadding} editable-element`} style={{ background: '#0f172a', color: '#fff', padding: '20px 0', textAlign: 'center' }}>
+      <div className={`${styles.responsivePadding} editable-element`} style={{ 
+        background: `linear-gradient(rgba(15, 23, 42, 0.7), rgba(15, 23, 42, 0.8)), url('${sectionData.backgroundImage}') center/cover no-repeat fixed`,
+        color: '#fff', 
+        padding: '120px 20px', 
+        textAlign: 'center',
+        position: 'relative',
+        minHeight: '500px',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center'
+      }}>
         {!props.isReadOnly && <EditToolbar onSettingsClick={() => setIsSidebarOpen(true)} />}
-        <h2 
-          style={{ marginBottom: '20px' }}
-          contentEditable={!props.isReadOnly} 
-          suppressContentEditableWarning 
+        <h2
+          style={{ 
+            fontSize: '14px', 
+            fontWeight: 800, 
+            letterSpacing: '5px', 
+            textTransform: 'uppercase', 
+            color: primaryColor,
+            marginBottom: '40px',
+            textShadow: '0 2px 10px rgba(0,0,0,0.5)'
+          }}
+          contentEditable={!props.isReadOnly}
+          suppressContentEditableWarning
           onBlur={(e) => props.updateData?.({ ...sectionData, title: e.target.innerText })}
         >
           {sectionData.title}
         </h2>
-        <div className={styles.countdownValue}>{sectionData.targetDate ? sectionData.targetDate.replace('T', ' ') : '2026-10-15 09:00'}</div>
+
+        <div style={{ display: 'flex', gap: '30px', justifyContent: 'center', flexWrap: 'wrap' }}>
+          {[
+            { label: 'Days', value: timeLeft.days },
+            { label: 'Hours', value: timeLeft.hours },
+            { label: 'Minutes', value: timeLeft.minutes },
+            { label: 'Seconds', value: timeLeft.seconds }
+          ].map((unit, i) => (
+            <div key={i} style={{ 
+              background: 'rgba(255,255,255,0.05)', 
+              backdropFilter: 'blur(15px)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              padding: '35px 30px',
+              borderRadius: '28px',
+              minWidth: '150px',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+            }}>
+              <div style={{ fontSize: '64px', fontWeight: 800, lineHeight: 1, marginBottom: '12px', fontFamily: 'inherit', color: '#fff' }}>
+                {String(unit.value).padStart(2, '0')}
+              </div>
+              <div style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '3px', color: primaryColor }}>
+                {unit.label}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </SectionWrapper>
   );
 };
-
 // 7. TEXT
 export const TextSection: React.FC<ContentSectionProps> = (props) => {
   const sectionData = {
@@ -478,23 +549,102 @@ export const EmbedWidgetSection: React.FC<ContentSectionProps> = (props) => {
 export const GallerySection: React.FC<ContentSectionProps> = (props) => {
   const sectionData = {
     ...props.data,
+    title: props.data?.title || 'Event Gallery',
+    badge: props.data?.badge || 'MOMENTS',
     items: (props.data?.items && props.data.items.length > 0) ? props.data.items : [
-      { image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400' },
-      { image: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=400' },
-      { image: 'https://images.unsplash.com/photo-1511578314322-379afb476865?w=400' },
-      { image: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400' }
+      { image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800', title: 'Grand Opening' },
+      { image: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=800', title: 'Tech Talk' },
+      { image: 'https://images.unsplash.com/photo-1511578314322-379afb476865?w=800', title: 'Networking' },
+      { image: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800', title: 'Closing Ceremony' }
     ]
   };
 
+  const updateItem = (index: number, field: string, value: string) => {
+    const newItems = [...sectionData.items];
+    newItems[index] = { ...newItems[index], [field]: value };
+    props.updateData?.({ ...sectionData, items: newItems });
+  };
+
+  const deleteItem = (index: number) => {
+    const newItems = sectionData.items.filter((_: any, i: number) => i !== index);
+    props.updateData?.({ ...sectionData, items: newItems });
+  };
+
+  const addItem = () => {
+    const newItems = [...sectionData.items, { image: 'https://via.placeholder.com/800x600', title: 'New Image' }];
+    props.updateData?.({ ...sectionData, items: newItems });
+  };
+
+  const triggerUpload = (index: number) => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = (e: any) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onloadend = () => updateItem(index, 'image', reader.result as string);
+        reader.readAsDataURL(file);
+      }
+    };
+    input.click();
+  };
+
+  const primaryColor = props.themeConfig?.primaryColor || '#ff6b00';
+
   return (
-    <SectionWrapper {...props} themeConfig={props.themeConfig} data={sectionData} onSettingsClick={() => {}}>
-      <div className={`${styles.sectionContainer} ${styles.responsivePadding}`} style={{ '--primary': props.themeConfig?.primaryColor || '#ff5722' } as any}>
-        <h2 style={{ fontSize: '32px', fontWeight: 800, marginBottom: '60px', textAlign: 'center' }}>Event Gallery</h2>
-        <div className={styles.responsiveGrid}>
+    <SectionWrapper {...props} themeConfig={props.themeConfig} data={sectionData}>
+      <div className={`${styles.gallerySection} ${styles.responsivePadding}`}>
+        <div className={styles.galleryHeader}>
+           <div 
+            style={{ display: 'inline-block', background: `${primaryColor}15`, color: primaryColor, padding: '6px 16px', borderRadius: '99px', fontSize: '11px', fontWeight: 800, letterSpacing: '2px', marginBottom: '16px' }}
+            contentEditable={!props.isReadOnly}
+            suppressContentEditableWarning
+            onBlur={(e) => props.updateData?.({ ...sectionData, badge: e.target.innerText })}
+           >
+             {sectionData.badge}
+           </div>
+           <h2 
+            style={{ fontSize: '42px', fontWeight: 900, letterSpacing: '-1px' }}
+            contentEditable={!props.isReadOnly}
+            suppressContentEditableWarning
+            onBlur={(e) => props.updateData?.({ ...sectionData, title: e.target.innerText })}
+           >
+             {sectionData.title}
+           </h2>
+        </div>
+
+        <div className={styles.galleryGrid}>
            {sectionData.items.map((item: any, i: number) => (
-             <img key={i} src={item.image} style={{ width: '100%', height: '250px', objectFit: 'cover', borderRadius: '12px' }} alt={`Gallery ${i}`} />
+             <div key={i} className={styles.galleryItem}>
+                <img src={item.image} alt={item.title} />
+                <div className={styles.galleryOverlay}>
+                   <div 
+                    className={styles.galleryTitle}
+                    contentEditable={!props.isReadOnly}
+                    suppressContentEditableWarning
+                    onBlur={(e) => updateItem(i, 'title', e.target.innerText)}
+                   >
+                     {item.title}
+                   </div>
+                </div>
+                {!props.isReadOnly && (
+                  <div className={styles.cardActions}>
+                    <button className={styles.cardActionBtn} onClick={() => triggerUpload(i)} title="Change Image"><i className="fas fa-camera"></i></button>
+                    <button className={styles.cardActionBtn} onClick={() => deleteItem(i)} title="Delete Image"><i className="fas fa-trash-alt"></i></button>
+                  </div>
+                )}
+             </div>
            ))}
         </div>
+        
+        {!props.isReadOnly && (
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '40px' }}>
+            <button className={styles.addItemBtn} onClick={addItem}>
+              <i className="fas fa-plus"></i> Add Image to Gallery
+            </button>
+          </div>
+        )}
       </div>
     </SectionWrapper>
   );
@@ -712,10 +862,11 @@ export const FeaturedSessionsSection: React.FC<ContentSectionProps> = (props) =>
   const sectionData = {
     ...props.data,
     title: props.data?.title || 'Featured Sessions',
+    subtitle: props.data?.subtitle || 'Deep dive into the future of technology with our expert-led sessions.',
     items: (props.data?.items && props.data.items.length > 0) ? props.data.items : [
-      { time: '09:00 AM', title: 'Opening Keynote: Future Vision', image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400' },
-      { time: '11:30 AM', title: 'Strategic Growth & Scaling', image: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=400' },
-      { time: '02:00 PM', title: 'AI & Machine Learning Deep Dive', image: 'https://images.unsplash.com/photo-1511578314322-379afb476865?w=400' }
+      { time: '09:00 AM', title: 'Opening Keynote: Future Vision', image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800', category: 'KEYNOTE' },
+      { time: '11:30 AM', title: 'Strategic Growth & Scaling', image: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=800', category: 'WORKSHOP' },
+      { time: '02:00 PM', title: 'AI & Machine Learning Deep Dive', image: 'https://images.unsplash.com/photo-1511578314322-379afb476865?w=800', category: 'TECH TALK' }
     ]
   };
 
@@ -746,7 +897,7 @@ export const FeaturedSessionsSection: React.FC<ContentSectionProps> = (props) =>
   const addSession = () => {
     const newItems = [
       ...sectionData.items,
-      { time: '04:00 PM', title: 'New Featured Session', image: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400' }
+      { time: '04:00 PM', title: 'New Featured Session', image: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800', category: 'SESSION' }
     ];
     props.updateData?.({ ...sectionData, items: newItems });
   };
@@ -756,18 +907,35 @@ export const FeaturedSessionsSection: React.FC<ContentSectionProps> = (props) =>
        {!props.isReadOnly && (
         <SettingsPanel isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} mode="AGENDA" data={sectionData} updateData={(newData) => props.updateData?.({ ...sectionData, ...newData })} />
       )}
-      <div className={styles.sectionContainer} style={{ paddingLeft: '60px', paddingRight: '60px', width: '100%' }}>
-        <h2 
-          style={{ fontSize: '32px', fontWeight: 800, marginBottom: '60px', textAlign: 'center' }}
-          contentEditable={!props.isReadOnly} 
-          suppressContentEditableWarning 
-          onBlur={(e) => props.updateData?.({ ...sectionData, title: e.target.innerText })}
-        >
-          {sectionData.title}
-        </h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '30px', width: '100%' }}>
+      <div className={styles.featuredSectionContainer} style={{ '--primary': props.themeConfig?.primaryColor || '#ff5722' } as any}>
+        <div className={styles.featuredHeader}>
+          <h2 
+            className={styles.featuredMainTitle}
+            contentEditable={!props.isReadOnly} 
+            suppressContentEditableWarning 
+            onBlur={(e) => props.updateData?.({ ...sectionData, title: e.target.innerText })}
+          >
+            {sectionData.title}
+          </h2>
+          <p 
+            className={styles.featuredSubtitle}
+            contentEditable={!props.isReadOnly} 
+            suppressContentEditableWarning 
+            onBlur={(e) => props.updateData?.({ ...sectionData, subtitle: e.target.innerText })}
+          >
+            {sectionData.subtitle}
+          </p>
+        </div>
+
+        {!props.isReadOnly && (
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '30px' }}>
+            <EditToolbar onSettingsClick={() => setIsSidebarOpen(true)} />
+          </div>
+        )}
+
+        <div className={styles.featuredGrid}>
           {sectionData.items?.map((item: any, i: number) => (
-            <div key={i} className={styles.speakerCard} style={{ textAlign: 'left', padding: '0', overflow: 'hidden' }}>
+            <div key={i} className={styles.featuredCard}>
               {!props.isReadOnly && (
                 <div className={styles.cardActions}>
                   <button className={styles.cardActionBtn} onClick={() => deleteItem(i)} title="Delete Session">
@@ -775,44 +943,42 @@ export const FeaturedSessionsSection: React.FC<ContentSectionProps> = (props) =>
                   </button>
                 </div>
               )}
-              <div className={styles.speakerImgWrapper} style={{ width: '100%', height: '200px', borderRadius: '0', margin: '0' }}>
-                <img src={item.image} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt={item.title} />
+              
+              <div className={styles.featuredImageArea}>
+                <img src={item.image} alt={item.title} />
+                <div className={styles.featuredOverlay}></div>
+                <div className={styles.featuredBadge} style={{ background: props.themeConfig?.primaryColor || '#ff5722' }}>
+                   <span contentEditable={!props.isReadOnly} suppressContentEditableWarning onBlur={(e) => updateItem(i, 'category', e.target.innerText)}>{item.category || 'SESSION'}</span>
+                </div>
                 {!props.isReadOnly && (
-                  <>
-                    <div className={styles.imageOverlay} onClick={() => triggerImageUpload(i)}>
-                      <i className="fas fa-camera"></i>
-                    </div>
-                    <input 
-                      type="file" 
-                      id={`featured-session-img-${i}`} 
-                      hidden 
-                      accept="image/*" 
-                      onChange={(e) => handleImageChange(i, e)} 
-                    />
-                  </>
+                  <div className={styles.featuredUploadBtn} onClick={() => triggerImageUpload(i)}>
+                    <i className="fas fa-camera"></i>
+                  </div>
                 )}
+                <input type="file" id={`featured-session-img-${i}`} hidden accept="image/*" onChange={(e) => handleImageChange(i, e)} />
               </div>
-              <div style={{ padding: '24px' }}>
-                <div 
-                  style={{ color: props.themeConfig?.primaryColor || '#ff6b00', fontWeight: 800, fontSize: '14px', marginBottom: '8px' }}
-                  contentEditable={!props.isReadOnly} 
-                  suppressContentEditableWarning 
-                  onBlur={(e) => updateItem(i, 'time', e.target.innerText)}
-                >
-                  {item.time}
+
+              <div className={styles.featuredContent}>
+                <div className={styles.featuredTimeRow}>
+                   <i className="far fa-clock"></i>
+                   <span contentEditable={!props.isReadOnly} suppressContentEditableWarning onBlur={(e) => updateItem(i, 'time', e.target.innerText)}>{item.time}</span>
                 </div>
                 <h3 
-                  style={{ fontSize: '20px', fontWeight: 800, color: '#1e293b' }}
+                  className={styles.featuredCardTitle}
                   contentEditable={!props.isReadOnly} 
                   suppressContentEditableWarning 
                   onBlur={(e) => updateItem(i, 'title', e.target.innerText)}
                 >
                   {item.title}
                 </h3>
+                <div className={styles.featuredArrow}>
+                   <i className="fas fa-arrow-right"></i>
+                </div>
               </div>
             </div>
           ))}
         </div>
+        
         {!props.isReadOnly && (
           <button className={styles.addItemBtn} onClick={addSession}>
             <i className="fas fa-plus"></i> Add Featured Session
@@ -1106,10 +1272,10 @@ export const VenueSection: React.FC<ContentSectionProps> = (props) => {
 };
 
 export const MovingLineSection: React.FC<any> = (props) => {
-  const { data, updateData, isReadOnly = false, themeConfig } = props;
+  const { data = {}, updateData, isReadOnly = false, themeConfig } = props;
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
-  const items = (data.items && data.items.length > 0) ? data.items : [
+  const items = (data?.items && data.items.length > 0) ? data.items : [
     { type: 'image', content: 'https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg' },
     { type: 'image', content: 'https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg' },
     { type: 'image', content: 'https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg' },
@@ -1118,13 +1284,13 @@ export const MovingLineSection: React.FC<any> = (props) => {
     { type: 'image', content: 'https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg' }
   ];
 
-  const speed = data.speed || 40;
-  const direction = data.direction || 'left';
-  const gap = data.gap || 80;
-  const backgroundColor = data.backgroundColor || '#ffffff';
-  const textColor = data.textColor || '#0f172a';
-  const fontSize = data.fontSize || '24px';
-  const grayscaleImages = data.grayscaleImages ?? true;
+  const speed = data?.speed || 40;
+  const direction = data?.direction || 'left';
+  const gap = data?.gap || 80;
+  const backgroundColor = data?.backgroundColor || '#ffffff';
+  const textColor = data?.textColor || '#0f172a';
+  const fontSize = data?.fontSize || '24px';
+  const grayscaleImages = data?.grayscaleImages ?? true;
 
   // Duplicate items for seamless loop
   const displayItems = [...items, ...items];
@@ -1148,7 +1314,8 @@ export const MovingLineSection: React.FC<any> = (props) => {
           padding: '40px 0',
           '--item-gap': `${gap}px`,
           '--image-filter': grayscaleImages ? 'grayscale(100%) opacity(0.6)' : 'none',
-          '--speed': `${speed}s`
+          '--speed': `${speed}s`,
+          '--bg-color': backgroundColor
         } as any}
       >
         <div 

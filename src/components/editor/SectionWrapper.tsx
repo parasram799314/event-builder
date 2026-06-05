@@ -99,14 +99,15 @@ const SectionWrapper: React.FC<SectionWrapperProps> = ({
   const scaleFactor = Math.max(0.4, (verticalPadding + 50) / 150);
 
   const getDynamicStyles = () => {
+    const p = `${verticalPadding || 60}px`;
     return {
-      '--section-v-padding': `0px`,
+      '--section-v-padding': p,
       '--content-scale': scaleFactor,
       '--dynamic-gap': `${Math.max(4, 32 * scaleFactor)}px`,
       '--dynamic-item-padding': `${Math.max(8, 40 * scaleFactor)}px`,
       '--dynamic-title-size': `${Math.max(18, 42 * scaleFactor)}px`,
-      paddingTop: `0px`, 
-      paddingBottom: `0px`
+      paddingTop: isFirst ? '0px' : p, 
+      paddingBottom: p
     };
   };
 
