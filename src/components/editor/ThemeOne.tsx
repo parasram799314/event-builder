@@ -238,31 +238,23 @@ const Navbar = ({ primaryColor, isReadOnly, logo, profiles, onTabChange, section
   const homeProfile = profiles?.find(p => p.isDefault || p.id === 'home') || profiles?.[0];
   const isCurrentlyHome = sections && homeProfile && sections === homeProfile.sections;
 
-  // 1. Get section links - Fallback to current sections if profiles are empty
-  const activeSections = homeProfile?.sections || sections || [];
-  const sectionLinks = activeSections
-    .filter((s: any) => s.isVisible !== false && s.type)
-    .map((s: any) => {
-      const type = s.type === 'GET_IN_TOUCH' ? 'CONTACT' : s.type;
-      const label = type.replace(/_/g, ' ');
-      // Normalize ID to match the component IDs
-      let id = (s.id || type.toLowerCase()).replace(/_/g, '');
-      if (id === 'hero') id = 'home';
-      if (id === 'agenda') id = 'sessions';
-      if (id === 'contact' || id === 'getintouch') id = 'contact';
-      const isHome = id === 'home';
-      
-      return { id, label: label.toUpperCase(), isSection: !isHome, isProfile: isHome, profileName: homeProfile?.name || 'HOME' };
-    });
+  // 1. Home link (represents the home page/profile)
+  const homeLink = {
+    id: homeProfile?.id || 'home',
+    label: (homeProfile?.name || 'HOME').toUpperCase(),
+    isSection: false,
+    isProfile: true,
+    profileName: homeProfile?.name || 'HOME'
+  };
 
-  // 2. Get profile links (other than home)
+  // 2. Get other profile/page links
   const otherPageLinks = (profiles && profiles.length > 1) 
     ? profiles
       .filter(p => p.isVisible !== false && p.id !== homeProfile?.id)
       .map(p => ({ id: p.id, label: p.name.toUpperCase(), isProfile: true, profileName: p.name }))
     : [];
 
-  const navItems = [...sectionLinks, ...otherPageLinks];
+  const navItems = [homeLink, ...otherPageLinks];
 
   return (
     <nav style={{
