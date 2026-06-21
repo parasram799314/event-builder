@@ -251,7 +251,7 @@ const Navbar = ({ primaryColor, isReadOnly, logo, profiles, onTabChange, section
   const otherPageLinks = (profiles && profiles.length > 1) 
     ? profiles
       .filter(p => p.isVisible !== false && p.id !== homeProfile?.id)
-      .map(p => ({ id: p.id, label: p.name.toUpperCase(), isProfile: true, profileName: p.name }))
+      .map(p => ({ id: p.id, label: p.name.toUpperCase(), isSection: false, isProfile: true, profileName: p.name }))
     : [];
 
   const navItems = [homeLink, ...otherPageLinks];
