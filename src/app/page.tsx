@@ -97,6 +97,25 @@ export default function HomePage() {
     }
   };
 
+  const handleDelete = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    if (!confirm("Are you sure you want to delete this event?")) return;
+
+    try {
+      const res = await fetch(`/api/websites?id=${id}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        setEvents(events.filter((ev) => ev.id !== id));
+      } else {
+        alert("Failed to delete event");
+      }
+    } catch (error) {
+      console.error("Error deleting event:", error);
+      alert("Error deleting event");
+    }
+  };
+
   const filteredEvents = events.filter((event) => event.status !== "trash");
 
   // Common Styles for Design Tokens
@@ -110,7 +129,17 @@ export default function HomePage() {
       {/* TOP NAVBAR */}
       <nav className="shrink-0 h-16 bg-white flex items-center justify-between px-6 md:px-10 z-[100] border-b" style={{ borderColor: 'rgba(0,0,0,0.05)' }}>
         <div className="flex items-center gap-10">
-          <Image src="/logo3.png" alt="Logo" width={110} height={32} className="object-contain" />
+          <Link href="/">
+            <Image src="/logo3.png" alt="Logo" width={110} height={32} className="object-contain" />
+          </Link>
+          <div className="flex items-center gap-6">
+            <Link href="/agents" className="text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors">
+              Agents
+            </Link>
+            <Link href="/companies" className="text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors">
+              Companies
+            </Link>
+          </div>
         </div>
         <button 
           onClick={() => setShowModal(true)}
@@ -137,8 +166,17 @@ export default function HomePage() {
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider bg-slate-100 text-slate-600 border border-slate-200">
                       {event.status}
                     </span>
-                    <div className="w-7 h-7 rounded-full border border-slate-100 flex items-center justify-center text-[#94A3B8] group-hover:text-[#334155] group-hover:border-[#334155] transition-all">
-                      <i className="fa-solid fa-pencil text-[10px]"></i>
+                    <div className="flex gap-2">
+                      <div className="w-7 h-7 rounded-full border border-slate-100 flex items-center justify-center text-[#94A3B8] group-hover:text-[#334155] group-hover:border-[#334155] transition-all">
+                        <i className="fa-solid fa-pencil text-[10px]"></i>
+                      </div>
+                      <button 
+                        onClick={(e) => handleDelete(e, event.id)}
+                        className="w-7 h-7 rounded-full border border-slate-100 flex items-center justify-center text-[#94A3B8] hover:text-red-600 hover:border-red-600 transition-all bg-white"
+                        title="Delete Event"
+                      >
+                        <i className="fa-solid fa-trash-can text-[10px]"></i>
+                      </button>
                     </div>
                   </div>
                   <h3 className="font-bold text-[#334155] text-base mb-auto leading-tight group-hover:text-blue-600 truncate">{event.name}</h3>

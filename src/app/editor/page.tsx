@@ -41,6 +41,7 @@ import VisualsPanel from "@/components/editor/VisualsPanel";
 import PagesPanel from "@/components/editor/PagesPanel";
 import Footer from "@/components/Footer";
 
+
 import { Suspense } from "react";
 
 function NavratriEditorContent() {
@@ -52,6 +53,7 @@ function NavratriEditorContent() {
   const [activeLayout, setActiveLayout] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'desktop' | 'mobile'>('desktop');
   const [showMobileFrame, setShowMobileFrame] = useState(true);
+
 
   // Detect real mobile screen
   useEffect(() => {
@@ -881,6 +883,28 @@ function NavratriEditorContent() {
             <i className="fa-solid fa-rocket"></i>
             <span className={styles.btnText}>{isPublishing ? "Publishing..." : "Publish"}</span>
           </button>
+          <button 
+            className={styles.saveBtn} 
+            onClick={() => {
+              router.push('/agents');
+            }} 
+            title="Agents Profiles"
+            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+          >
+            <i className="fa-solid fa-user-tie"></i>
+            <span className={styles.btnText}>Agents Profiles</span>
+          </button>
+          <button 
+            className={styles.saveBtn} 
+            onClick={() => {
+              router.push('/companies');
+            }} 
+            title="Companies Profiles"
+            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+          >
+            <i className="fa-solid fa-building"></i>
+            <span className={styles.btnText}>Companies Profiles</span>
+          </button>
         </div>
       </header>
 
@@ -1153,9 +1177,10 @@ function NavratriEditorContent() {
             </div>
           </div>
         )}
-      </div>
+
     </div>
-  );
+  </div>
+);
 }
 
 export default function NavratriEditor() {
