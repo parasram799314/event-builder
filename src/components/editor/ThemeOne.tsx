@@ -288,8 +288,8 @@ export const Navbar = ({ primaryColor, isReadOnly, logo, profiles, onTabChange, 
                   suppressContentEditableWarning
                   onClick={(e) => !isReadOnly && e.stopPropagation()}
                 >
-                  <span style={{ color: '#fff', marginRight: '4px' }}>EVENT</span>
-                  <span>BUILDER</span>
+                  <span style={{ color: '#fff', marginRight: '4px' }}>AsianPaints</span>
+                  <span>Event</span>
                 </div>
               </div>
             )}
