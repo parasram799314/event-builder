@@ -121,7 +121,7 @@ export function AgentProfileViewAlt({ profile, onEdit, onUpdate, isOwner = false
                   {profile.fullName}
                 </h1>
                 {profile.isVerified && (
-                  <BadgeCheck className="h-6 w-6 text-blue-500 fill-blue-500/10" strokeWidth={2.5} title="Verified Travel Professional" />
+                  <BadgeCheck className="h-6 w-6 text-blue-500 fill-blue-500/10" strokeWidth={2.5} />
                 )}
               </div>
               
