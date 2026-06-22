@@ -1,19 +1,38 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { mockCompanies } from "@/lib/mockData";
 import { CompanyProfileView } from "@/components/companyprofile/companyprofile";
+import { Navbar } from "@/components/editor/ThemeOne";
 
 function CompaniesContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const companyId = searchParams.get("id");
+  const from = searchParams.get("from");
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTag, setSelectedTag] = useState("All");
+  const [website, setWebsite] = useState<any>(null);
+
+  useEffect(() => {
+    const match = from ? from.match(/\/preview\/(\d+)/) : null;
+    const websiteId = match ? match[1] : null;
+    if (!websiteId) return;
+
+    fetch(`/api/websites`)
+      .then(res => res.json())
+      .then(data => {
+        const current = data.find((w: any) => w.id === parseInt(websiteId));
+        if (current) {
+          setWebsite(current);
+        }
+      })
+      .catch(err => console.error("Error fetching website for navbar:", err));
+  }, [from]);
 
   // Get all unique tags from companies
   const allTags = ["All", ...Array.from(new Set(mockCompanies.flatMap(company => company.tags || [])))];
@@ -37,27 +56,68 @@ function CompaniesContent() {
     return (
       <div className="min-h-screen bg-[#FAFAFA]">
         {/* Navbar */}
-        <nav className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 md:px-10 sticky top-0 z-50 shadow-sm">
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={() => router.push("/companies")}
-              className="flex items-center gap-2 text-sm font-semibold text-slate-655 hover:text-slate-900 transition-colors cursor-pointer"
-            >
-              <i className="fa-solid fa-arrow-left"></i> Back to Companies
-            </button>
-          </div>
-          <div className="flex items-center gap-6">
-            <Link href="/" className="text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors">
-              Home
-            </Link>
-            <Link href="/agents" className="text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors">
-              Agents
-            </Link>
-          </div>
-        </nav>
+        {website ? (
+          <Navbar 
+            primaryColor={website.content?.themeConfig?.primaryColor || '#FFC107'}
+            isReadOnly={true}
+            logo={website.content?.sections?.find((s: any) => s.type === 'HERO')?.data?.logo || website.logo}
+            profiles={website.content?.eventProfiles}
+            sections={website.content?.sections}
+            showVisitorsPage={true}
+            onTabChange={(tabName) => {
+              const match = from ? from.match(/\/preview\/\d+/) : null;
+              const previewUrl = match ? match[0] : `/preview/${website.id}`;
+              router.push(`${previewUrl}?tab=${tabName.toLowerCase()}`);
+            }}
+            onVisitorsClick={() => {
+              const match = from ? from.match(/\/preview\/\d+/) : null;
+              const previewUrl = match ? match[0] : `/preview/${website.id}`;
+              router.push(`${previewUrl}?tab=visitors`);
+            }}
+            onProfileTabClick={() => {
+              const match = from ? from.match(/\/preview\/\d+/) : null;
+              const previewUrl = match ? match[0] : `/preview/${website.id}`;
+              router.push(`${previewUrl}`);
+            }}
+          />
+        ) : (
+          <nav className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 md:px-10 sticky top-0 z-50 shadow-sm">
+            <div className="flex items-center gap-4">
+              <button 
+                onClick={() => {
+                  if (from) {
+                    router.push(from);
+                  } else {
+                    router.push("/companies");
+                  }
+                }}
+                className="flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
+              >
+                <i className="fa-solid fa-arrow-left"></i> {from ? "Back to Event" : "Back to Companies"}
+              </button>
+            </div>
+            <div className="flex items-center gap-6">
+              <Link href="/" className="text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors">
+                Home
+              </Link>
+              <Link href="/agents" className="text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors">
+                Agents
+              </Link>
+            </div>
+          </nav>
+        )}
 
         {/* Profile Content */}
-        <div className="max-w-5xl mx-auto py-8 px-4 md:px-6">
+        <div className="max-w-5xl mx-auto py-8 px-4 md:px-6 pt-24">
+          {from && (
+            <button 
+              onClick={() => router.push(from)}
+              className="mb-6 inline-flex items-center gap-2 px-4 py-2 border border-slate-200 bg-white hover:bg-slate-50 text-sm font-bold text-slate-700 rounded-xl transition-all cursor-pointer shadow-sm active:scale-95"
+              style={{ borderColor: website?.content?.themeConfig?.primaryColor || undefined }}
+            >
+              <i className="fa-solid fa-arrow-left"></i> Back to Event Website
+            </button>
+          )}
           <CompanyProfileView 
             profile={selectedCompany}
             isOwner={false}
@@ -176,7 +236,7 @@ function CompaniesContent() {
                   {/* Right Side: View Action Button */}
                   <button 
                     onClick={() => router.push(`/companies?id=${company.companyName}`)}
-                    className="ml-4 shrink-0 bg-slate-850 hover:bg-slate-950 text-white text-xs font-bold px-4 py-1.5 rounded-lg active:scale-95 transition-all cursor-pointer"
+                    className="ml-4 shrink-0 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold px-4 py-1.5 rounded-lg active:scale-95 transition-all cursor-pointer"
                   >
                     View
                   </button>

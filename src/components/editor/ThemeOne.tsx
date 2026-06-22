@@ -1,11 +1,13 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import GoogleMapDisplay from './GoogleMapDisplay';
 
 const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
 import EditToolbar from './EditToolbar';
 import SettingsPanel, { SettingsMode } from './SettingsPanel';
+import { mockAgents, mockCompanies } from "@/lib/mockData";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const formatDate = (dateStr: string) => {
@@ -201,7 +203,7 @@ const NAV_LINKS = [
   { id: "contact", label: "CONTACT" }
 ];
 
-const Navbar = ({ primaryColor, isReadOnly, logo, profiles, onTabChange, sections, onUpdateLogo }: { primaryColor: string; isReadOnly?: boolean; logo?: string; profiles?: any[]; onTabChange?: (tab: string) => void; sections?: any[]; onUpdateLogo?: (newLogo: string) => void }) => {
+export const Navbar = ({ primaryColor, isReadOnly, logo, profiles, onTabChange, sections, onUpdateLogo, onSignInClick, isLoggedIn, onMyQrClick, onSignOutClick, showVisitorsPage, onVisitorsClick, onProfileTabClick }: { primaryColor: string; isReadOnly?: boolean; logo?: string; profiles?: any[]; onTabChange?: (tab: string) => void; sections?: any[]; onUpdateLogo?: (newLogo: string) => void; onSignInClick?: () => void; isLoggedIn?: boolean; onMyQrClick?: () => void; onSignOutClick?: () => void; showVisitorsPage?: boolean; onVisitorsClick?: () => void; onProfileTabClick?: () => void }) => {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -323,6 +325,7 @@ const Navbar = ({ primaryColor, isReadOnly, logo, profiles, onTabChange, section
           {navItems.map((item, idx) => (
             <li key={`${item.id}-${idx}`} style={{ flexShrink: 0 }} className={item.isSection ? 'section-link' : 'profile-link'}>
               <button onClick={() => {
+                onProfileTabClick?.();
                 if (item.isProfile) {
                   if (onTabChange) onTabChange(item.profileName);
                   setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
@@ -348,6 +351,125 @@ const Navbar = ({ primaryColor, isReadOnly, logo, profiles, onTabChange, section
               </button>
             </li>
           ))}
+          {/* VISITORS LINK */}
+          <li style={{ flexShrink: 0 }} className="profile-link">
+            <button 
+              onClick={() => {
+                onVisitorsClick?.();
+                setMenuOpen(false);
+                setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
+              }}
+              style={{
+                background: "transparent", border: "none", 
+                color: showVisitorsPage ? primaryColor : "#fff", 
+                fontSize: '13px',
+                fontWeight: 600, letterSpacing: "0.3px", textTransform: "uppercase",
+                padding: "5px 10px", cursor: "pointer",
+                fontFamily: "inherit", transition: "color 0.3s",
+                whiteSpace: 'nowrap'
+              }}
+              onMouseEnter={e => { if (!showVisitorsPage) e.currentTarget.style.color = primaryColor; }}
+              onMouseLeave={e => { if (!showVisitorsPage) e.currentTarget.style.color = "#fff"; }}
+            >
+              VISITORS
+            </button>
+          </li>
+          {isLoggedIn ? (
+            <>
+              <li style={{ flexShrink: 0, marginLeft: '10px', display: 'flex', alignItems: 'center' }}>
+                <button 
+                  onClick={() => onMyQrClick?.()}
+                  style={{
+                    background: 'transparent',
+                    border: `1.5px solid ${primaryColor}`,
+                    color: '#fff',
+                    fontSize: '12px',
+                    fontWeight: 700,
+                    letterSpacing: "0.5px",
+                    textTransform: "uppercase",
+                    padding: "8px 16px",
+                    borderRadius: "8px",
+                    cursor: "pointer",
+                    fontFamily: "inherit",
+                    transition: "all 0.3s ease",
+                    whiteSpace: 'nowrap',
+                    display: 'flex',
+                    alignItems: 'center'
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.background = `${primaryColor}20`;
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.background = 'transparent';
+                  }}
+                >
+                  <i className="fas fa-qrcode" style={{ marginRight: '6px' }}></i>
+                  MY QR
+                </button>
+              </li>
+              <li style={{ flexShrink: 0, marginLeft: '10px', display: 'flex', alignItems: 'center' }}>
+                <div 
+                  onClick={() => onSignOutClick?.()}
+                  style={{
+                    width: '36px',
+                    height: '36px',
+                    borderRadius: '50%',
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    border: `1px solid rgba(255, 255, 255, 0.2)`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    color: '#fff'
+                  }}
+                  title="Click to Sign Out"
+                  onMouseEnter={e => {
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
+                    e.currentTarget.style.borderColor = primaryColor;
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                  }}
+                >
+                  <i className="fas fa-user" style={{ fontSize: '16px' }}></i>
+                </div>
+              </li>
+            </>
+          ) : (
+            <li className="auth-li" style={{ flexShrink: 0, marginLeft: '10px', display: 'flex', alignItems: 'center' }}>
+              <button 
+                onClick={() => onSignInClick?.()}
+                style={{
+                  background: primaryColor, 
+                  border: "none", 
+                  color: "#fff", 
+                  fontSize: '12px',
+                  fontWeight: 700, 
+                  letterSpacing: "0.5px", 
+                  textTransform: "uppercase",
+                  padding: "8px 16px", 
+                  borderRadius: "8px", 
+                  cursor: "pointer",
+                  fontFamily: "inherit", 
+                  transition: "all 0.3s ease",
+                  whiteSpace: 'nowrap',
+                  boxShadow: `0 4px 10px ${primaryColor}30`
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                  e.currentTarget.style.boxShadow = `0 6px 15px ${primaryColor}50`;
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.transform = 'none';
+                  e.currentTarget.style.boxShadow = `0 4px 10px ${primaryColor}30`;
+                }}
+              >
+                Sign In
+              </button>
+            </li>
+          )}
         </ul>
       </div>
 
@@ -397,6 +519,17 @@ const Navbar = ({ primaryColor, isReadOnly, logo, profiles, onTabChange, section
           .nav-links li.section-link {
             display: none !important;
           }
+          .nav-links li.auth-li {
+            margin-left: 0 !important;
+            padding: 8px 12px !important;
+          }
+          .nav-links li.auth-li button {
+            width: 100% !important;
+            text-align: center !important;
+            font-size: 12px !important;
+            padding: 10px 16px !important;
+            border-bottom: none !important;
+          }
         }
       `}</style>
     </nav>
@@ -404,7 +537,7 @@ const Navbar = ({ primaryColor, isReadOnly, logo, profiles, onTabChange, section
 };
 
 // ─── Countdown Timer ────────────────────────────────────────────────────────
-const CountdownTimer = ({ colors, targetDate }: { colors: any, targetDate?: string }) => {
+const CountdownTimer = ({ colors, targetDate, lightMode = false, compact = false }: { colors: any, targetDate?: string, lightMode?: boolean, compact?: boolean }) => {
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
@@ -439,36 +572,36 @@ const CountdownTimer = ({ colors, targetDate }: { colors: any, targetDate?: stri
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    background: 'rgba(255,255,255,0.05)',
+    background: lightMode ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.05)',
     backdropFilter: 'blur(15px)',
-    padding: '24px',
-    borderRadius: '24px',
-    minWidth: '110px',
-    border: '1px solid rgba(255,255,255,0.1)',
-    boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
+    padding: compact ? '14px 18px' : '24px',
+    borderRadius: compact ? '18px' : '24px',
+    minWidth: compact ? '80px' : '110px',
+    border: lightMode ? '1px solid rgba(0,0,0,0.06)' : '1px solid rgba(255,255,255,0.1)',
+    boxShadow: lightMode ? '0 10px 20px rgba(0,0,0,0.03)' : '0 20px 40px rgba(0,0,0,0.2)',
     transition: 'all 0.3s ease'
   };
 
   const valStyle: React.CSSProperties = {
-    fontSize: '48px',
+    fontSize: compact ? '32px' : '48px',
     fontWeight: 800,
-    color: '#fff',
+    color: lightMode ? '#0f172a' : '#fff',
     lineHeight: 1,
-    letterSpacing: '-2px'
+    letterSpacing: compact ? '-1.5px' : '-2px'
   };
 
   const labelStyle: React.CSSProperties = {
-    fontSize: '11px',
+    fontSize: compact ? '9px' : '11px',
     fontWeight: 700,
     textTransform: 'uppercase',
-    letterSpacing: '3px',
+    letterSpacing: compact ? '2px' : '3px',
     color: colors.primary,
-    marginTop: '12px',
+    marginTop: compact ? '6px' : '12px',
     opacity: 0.9
   };
 
   return (
-    <div className="countdown-container" style={{ display: 'flex', gap: '24px', justifyContent: 'center', marginTop: '60px', flexWrap: 'wrap' }}>
+    <div className="countdown-container" style={{ display: 'flex', gap: compact ? '12px' : '24px', justifyContent: 'center', marginTop: compact ? '28px' : '60px', flexWrap: 'wrap' }}>
       {[
         { label: 'Days', value: timeLeft.days },
         { label: 'Hours', value: timeLeft.hours },
@@ -489,9 +622,11 @@ const Container = ({ children, style, className = "" }: { children: React.ReactN
   <div className={`theme-container ${className}`} style={{ maxWidth: 1100, margin: "0 auto", padding: "0 20px", ...style }}>{children}</div>
 );
 
-const HomeHero = ({ colors, data, onUpdate, isReadOnly, isMounted, isFirst }: { colors: any; data: any; onUpdate: any; isReadOnly?: boolean; isMounted: boolean; isFirst?: boolean }) => {
+const HomeHero = ({ colors, data, onUpdate, isReadOnly, isMounted, isFirst, onRegisterClick }: { colors: any; data: any; onUpdate: any; isReadOnly?: boolean; isMounted: boolean; isFirst?: boolean; onRegisterClick?: () => void }) => {
   const slide = data?.slides?.[0] || {};
   const dt = data?.dateTimeSettings || {};
+  const layout = slide.layout || 'full-bg';
+  const isSplit = layout === 'split-left' || layout === 'split-right';
   
   const updateSlide = (field: string, value: string) => {
     const newSlides = [...(data?.slides || [{ id: 1 }])];
@@ -499,100 +634,275 @@ const HomeHero = ({ colors, data, onUpdate, isReadOnly, isMounted, isFirst }: { 
     onUpdate({ ...data, slides: newSlides });
   };
 
+  const sectionStyle: React.CSSProperties = isSplit ? {
+    background: '#ffffff', // Clean white background for split mode
+    minHeight: '750px',
+    display: 'flex',
+    alignItems: 'center',
+    color: '#0f172a', // Dark text color
+    position: 'relative',
+    padding: isFirst ? '40px 0 100px 0' : '100px 0',
+    overflow: 'hidden'
+  } : {
+    background: `linear-gradient(rgba(15, 23, 42, 0.4),rgba(15, 23, 42, 0.7)), url('${slide.images?.[0] || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1600'}') center/cover no-repeat fixed`,
+    height: "80vh", minHeight: "700px", display: "flex", alignItems: "center", color: colors.white, textAlign: "center", position: 'relative',
+    padding: isFirst ? '0 0 100px 0' : '100px 0'
+  };
+
+  const containerStyle: React.CSSProperties = isSplit ? {
+    display: 'flex',
+    flexDirection: layout === 'split-right' ? 'row-reverse' : 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: '60px',
+    width: '100%'
+  } : {};
+
+  const contentStyle: React.CSSProperties = isSplit ? {
+    flex: '0 0 50%',
+    width: '50%',
+    textAlign: 'left',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    zIndex: 2
+  } : {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    textAlign: 'center'
+  };
+
+  const imageStyle: React.CSSProperties = isSplit ? {
+    flex: '0 0 42%',
+    width: '42%',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+    zIndex: 2
+  } : {
+    display: 'none'
+  };
+
+  const triggerImageUpload = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = (e: any) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const newSlides = [...(data.slides || [{ id: 1 }])];
+          newSlides[0].images = [reader.result as string];
+          onUpdate({ slides: newSlides });
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+    input.click();
+  };
+
   return (
-    <section id="home" style={{
-      background: `linear-gradient(rgba(15, 23, 42, 0.4),rgba(15, 23, 42, 0.7)), url('${slide.images?.[0] || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1600'}') center/cover no-repeat fixed`,
-      height: "80vh", minHeight: "700px", display: "flex", alignItems: "center", color: colors.white, textAlign: "center", position: 'relative',
-      padding: isFirst ? '0 0 100px 0' : '100px 0'
-    }}>
-      <Container>
-        {!isReadOnly && (
+    <section id="home" style={sectionStyle}>
+      {/* Background visual elements for split mode to make it premium */}
+      {isSplit && (
+        <>
+          <style>{`
+            @media (max-width: 768px) {
+              .home-hero-container {
+                flex-direction: column !important;
+                gap: 40px !important;
+              }
+              .home-hero-content {
+                flex: 0 0 100% !important;
+                width: 100% !important;
+                align-items: center !important;
+                text-align: center !important;
+              }
+              .home-hero-content h1, .home-hero-content p {
+                text-align: center !important;
+              }
+              .home-hero-image {
+                flex: 0 0 100% !important;
+                width: 100% !important;
+              }
+              .home-hero-btn-group {
+                justify-content: center !important;
+              }
+              .home-hero-meta-group {
+                justify-content: center !important;
+              }
+            }
+          `}</style>
+          <div style={{
+            position: 'absolute',
+            top: '-10%',
+            right: layout === 'split-left' ? '-10%' : 'auto',
+            left: layout === 'split-right' ? '-10%' : 'auto',
+            width: '50vw',
+            height: '50vw',
+            borderRadius: '50%',
+            background: `radial-gradient(circle, ${colors.primary}08 0%, transparent 70%)`,
+            zIndex: 1,
+            pointerEvents: 'none'
+          }} />
+          <div style={{
+            position: 'absolute',
+            bottom: '-20%',
+            left: layout === 'split-left' ? '-5%' : 'auto',
+            right: layout === 'split-right' ? '-5%' : 'auto',
+            width: '35vw',
+            height: '35vw',
+            borderRadius: '50%',
+            background: `radial-gradient(circle, ${colors.primary}04 0%, transparent 70%)`,
+            zIndex: 1,
+            pointerEvents: 'none'
+          }} />
+        </>
+      )}
+
+      <Container style={containerStyle} className="home-hero-container">
+        {/* Change background button for full bg mode */}
+        {!isReadOnly && !isSplit && (
           <div style={{ position: 'absolute', top: '20px', right: '20px', zIndex: 10 }}>
             <button 
-              onClick={() => {
-                const input = document.createElement('input');
-                input.type = 'file';
-                input.accept = 'image/*';
-                input.onchange = (e: any) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                      const newSlides = [...(data.slides || [{ id: 1 }])];
-                      newSlides[0].images = [reader.result as string];
-                      onUpdate({ slides: newSlides });
-                    };
-                    reader.readAsDataURL(file);
-                  }
-                };
-                input.click();
-              }}
+              onClick={triggerImageUpload}
               style={{ background: colors.primary, color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '12px', fontWeight: 700, cursor: 'pointer', fontSize: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.2)' }}
             >
               CHANGE BACKGROUND
             </button>
           </div>
         )}
-        
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)', padding: '8px 20px', borderRadius: '9999px', marginBottom: '32px', border: '1px solid rgba(255,255,255,0.2)' }}>
-          <i className="fas fa-star" style={{ color: colors.primary, fontSize: '12px' }}></i>
-          <span style={{ fontSize: '14px', fontWeight: 800, letterSpacing: '2px', textTransform: 'uppercase' }}>{slide.badge || 'Limited Seats Available'}</span>
-        </div>
 
-        <EditableText 
-          tagName="h1" text={slide.title || 'Experience the Next Big Thing'} isReadOnly={isReadOnly}
-          onUpdate={(val: string) => updateSlide('title', val)}
-          style={{ width: '100%', textAlign: 'center', fontSize: 'clamp(32px, 6vw, 84px)', fontWeight: 800, letterSpacing: '-2px', marginBottom: '24px', lineHeight: '1.1', textTransform: 'uppercase', textShadow: '0 10px 30px rgba(0,0,0,0.3)', overflowWrap: 'break-word', wordBreak: 'break-word' }}
-        />
-        
-        <EditableText 
-          tagName="p" text={slide.subtitle || 'Join industry leaders and innovators for a three-day journey through the future of technology and networking.'} isReadOnly={isReadOnly}
-          onUpdate={(val: string) => updateSlide('subtitle', val)}
-          style={{ width: '100%', textAlign: 'center', fontSize: 'clamp(16px, 2vw, 22px)', maxWidth: '850px', margin: '0 auto 48px', color: 'rgba(255,255,255,0.9)', lineHeight: '1.6', fontWeight: 400, overflowWrap: 'break-word' }}
-        />
-        
-        <div style={{ display: "flex", gap: '20px', justifyContent: "center", marginBottom: '60px', flexWrap: 'wrap' }}>
-          {slide.primaryBtnLink ? (
-            <a href={slide.primaryBtnLink} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
-              <button style={{ ...btnBase, background: colors.primary, borderColor: colors.primary, color: "#fff", padding: '18px 48px', boxShadow: `0 10px 25px ${colors.primary}40`, borderRadius: '14px' }}>
+        <div style={contentStyle} className="home-hero-content">
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: isSplit ? `${colors.primary}0d` : 'rgba(255,255,255,0.06)', backdropFilter: 'blur(10px)', padding: '8px 20px', borderRadius: '9999px', marginBottom: '32px', border: isSplit ? `1.5px solid ${colors.primary}20` : '1px solid rgba(255,255,255,0.12)' }}>
+            <i className="fas fa-star" style={{ color: colors.primary, fontSize: '12px' }}></i>
+            <span style={{ fontSize: '13px', fontWeight: 800, letterSpacing: '2px', textTransform: 'uppercase', color: isSplit ? colors.primary : '#fff' }}>{slide.badge || 'Limited Seats Available'}</span>
+          </div>
+
+          <EditableText 
+            tagName="h1" text={slide.title || 'Experience the Next Big Thing'} isReadOnly={isReadOnly}
+            onUpdate={(val: string) => updateSlide('title', val)}
+            style={{ width: '100%', textAlign: isSplit ? 'left' : 'center', fontSize: isSplit ? 'clamp(28px, 3.8vw, 48px)' : 'clamp(32px, 5vw, 64px)', fontWeight: 800, letterSpacing: '-1.5px', marginBottom: '20px', lineHeight: '1.15', textTransform: 'uppercase', textShadow: isSplit ? 'none' : '0 10px 30px rgba(0,0,0,0.3)', overflowWrap: 'break-word', wordBreak: 'break-word', color: isSplit ? '#0f172a' : '#fff' }}
+          />
+          
+          <EditableText 
+            tagName="p" text={slide.subtitle || 'Join industry leaders and innovators for a three-day journey through the future of technology and networking.'} isReadOnly={isReadOnly}
+            onUpdate={(val: string) => updateSlide('subtitle', val)}
+            style={{ width: '100%', textAlign: isSplit ? 'left' : 'center', fontSize: isSplit ? '15px' : 'clamp(15px, 1.8vw, 20px)', maxWidth: isSplit ? '100%' : '850px', margin: isSplit ? '0 0 32px 0' : '0 auto 48px', color: isSplit ? '#576071' : 'rgba(255,255,255,0.8)', lineHeight: '1.65', fontWeight: 400, overflowWrap: 'break-word' }}
+          />
+          
+          <div style={{ display: "flex", gap: '12px', justifyContent: isSplit ? "flex-start" : "center", marginBottom: '40px', flexWrap: 'wrap', width: '100%' }} className="home-hero-btn-group">
+            {slide.primaryBtnLink ? (
+              <a 
+                href={slide.primaryBtnLink} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                style={{ textDecoration: 'none' }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  onRegisterClick?.();
+                }}
+              >
+                <button style={{ ...btnBase, background: colors.primary, borderColor: colors.primary, color: "#fff", padding: '14px 36px', boxShadow: `0 10px 25px ${colors.primary}30`, borderRadius: '12px', cursor: 'pointer', fontSize: '13px', fontWeight: 700 }}>
+                  {slide.primaryBtnLabel || 'REGISTER NOW'}
+                </button>
+              </a>
+            ) : (
+              <button 
+                onClick={() => onRegisterClick?.()}
+                style={{ ...btnBase, background: colors.primary, borderColor: colors.primary, color: "#fff", padding: '14px 36px', boxShadow: `0 10px 25px ${colors.primary}30`, borderRadius: '12px', cursor: 'pointer', fontSize: '13px', fontWeight: 700 }}
+              >
                 {slide.primaryBtnLabel || 'REGISTER NOW'}
               </button>
-            </a>
-          ) : (
-            <button style={{ ...btnBase, background: colors.primary, borderColor: colors.primary, color: "#fff", padding: '18px 48px', boxShadow: `0 10px 25px ${colors.primary}40`, borderRadius: '14px' }}>
-              {slide.primaryBtnLabel || 'REGISTER NOW'}
-            </button>
-          )}
+            )}
 
-          {slide.secondaryBtnLink ? (
-            <a href={slide.secondaryBtnLink} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
-              <button style={{ ...btnBase, background: "rgba(255,255,255,0.1)", backdropFilter: 'blur(10px)', color: "#fff", padding: '18px 48px', border: '2px solid rgba(255,255,255,0.3)', borderRadius: '14px' }}>
+            {slide.secondaryBtnLink ? (
+              <a href={slide.secondaryBtnLink} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+                <button style={{ ...btnBase, background: isSplit ? "rgba(0,0,0,0.03)" : "rgba(255,255,255,0.06)", backdropFilter: 'blur(10px)', color: isSplit ? "#0f172a" : "#fff", padding: '14px 36px', border: isSplit ? '1.5px solid rgba(0,0,0,0.1)' : '1.5px solid rgba(255,255,255,0.2)', borderRadius: '12px', fontSize: '13px', fontWeight: 700 }}>
+                  {slide.secondaryBtnLabel || 'VIEW AGENDA'}
+                </button>
+              </a>
+            ) : (
+              <button style={{ ...btnBase, background: isSplit ? "rgba(0,0,0,0.03)" : "rgba(255,255,255,0.06)", backdropFilter: 'blur(10px)', color: isSplit ? "#0f172a" : "#fff", padding: '14px 36px', border: isSplit ? '1.5px solid rgba(0,0,0,0.1)' : '1.5px solid rgba(255,255,255,0.2)', borderRadius: '12px', fontSize: '13px', fontWeight: 700 }}>
                 {slide.secondaryBtnLabel || 'VIEW AGENDA'}
               </button>
-            </a>
-          ) : (
-            <button style={{ ...btnBase, background: "rgba(255,255,255,0.1)", backdropFilter: 'blur(10px)', color: "#fff", padding: '18px 48px', border: '2px solid rgba(255,255,255,0.3)', borderRadius: '14px' }}>
-              {slide.secondaryBtnLabel || 'VIEW AGENDA'}
-            </button>
-          )}
+            )}
+          </div>
+
+          <div style={{ display: 'flex', gap: '24px', justifyContent: isSplit ? 'flex-start' : 'center', flexWrap: 'wrap', color: isSplit ? '#576071' : '#fff', opacity: 0.85, marginBottom: '32px', width: '100%' }} className="home-hero-meta-group">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600, fontSize: '13px' }}>
+               <i className="fas fa-calendar" style={{ color: colors.primary }}></i>
+               <span>{dt.eventDate ? (isMounted ? formatDate(dt.eventDate) : 'Oct 15, 2026') : 'Oct 15, 2026'}</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600, fontSize: '13px' }}>
+               <i className="fas fa-clock" style={{ color: colors.primary }}></i>
+               <span>{dt.eventDate ? (isMounted ? new Date(dt.eventDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '06:00 PM') : '06:00 PM'}</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600, fontSize: '13px' }}>
+               <i className="fas fa-map-marker-alt" style={{ color: colors.primary }}></i>
+               <span>{dt.venueText || 'Grand Convention Center, SF'}</span>
+            </div>
+          </div>
+
+          <div style={{ width: '100%', display: 'flex', justifyContent: isSplit ? 'flex-start' : 'center' }}>
+            <CountdownTimer colors={colors} lightMode={isSplit} compact={isSplit} targetDate={dt.eventDate} />
+          </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '40px', justifyContent: 'center', flexWrap: 'wrap', color: '#fff', opacity: 0.8, marginBottom: '60px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontWeight: 600 }}>
-             <i className="fas fa-calendar" style={{ color: colors.primary }}></i>
-             <span>{dt.eventDate ? (isMounted ? formatDate(dt.eventDate) : 'Oct 15, 2026') : 'Oct 15, 2026'}</span>
+        {isSplit && (
+          <div style={imageStyle} className="home-hero-image">
+            <div style={{
+              width: '100%',
+              maxWidth: '520px',
+              aspectRatio: '1.3',
+              borderRadius: '28px',
+              overflow: 'hidden',
+              boxShadow: `0 20px 40px -10px rgba(0,0,0,0.12), 0 0 50px -10px ${colors.primary}15`,
+              border: '1px solid rgba(0,0,0,0.08)',
+              position: 'relative',
+              zIndex: 2
+            }}>
+              <img 
+                src={slide.images?.[0] || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800'} 
+                alt="Event Hero" 
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+              
+              {!isReadOnly && (
+                <div style={{
+                  position: 'absolute',
+                  inset: 0,
+                  background: 'rgba(0,0,0,0.4)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  opacity: 0.85,
+                  transition: 'opacity 0.2s'
+                }}>
+                  <button 
+                    onClick={triggerImageUpload}
+                    style={{
+                      background: colors.primary,
+                      color: '#fff',
+                      border: 'none',
+                      padding: '12px 24px',
+                      borderRadius: '12px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      fontSize: '13px',
+                      boxShadow: '0 4px 15px rgba(0,0,0,0.3)'
+                    }}
+                  >
+                    <i className="fas fa-image" style={{ marginRight: '8px' }}></i> CHANGE IMAGE
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontWeight: 600 }}>
-             <i className="fas fa-clock" style={{ color: colors.primary }}></i>
-             <span>{dt.eventDate ? (isMounted ? new Date(dt.eventDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '06:00 PM') : '06:00 PM'}</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontWeight: 600 }}>
-             <i className="fas fa-map-marker-alt" style={{ color: colors.primary }}></i>
-             <span>{dt.venueText || 'Grand Convention Center, SF'}</span>
-          </div>
-        </div>
-
-        <CountdownTimer colors={colors} />
+        )}
       </Container>
     </section>
   );
@@ -1028,6 +1338,1166 @@ import {
   GallerySection
 } from './ContentSections';
 
+// ─── QR Modal Component ──────────────────────────────────────────────────
+const QrModal = ({ colors, onClose }: { colors: any; onClose: () => void }) => {
+  return (
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(15, 23, 42, 0.75)',
+      backdropFilter: 'blur(8px)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 99999,
+      padding: '20px',
+      animation: 'fadeInModal 0.25s ease-out'
+    }}>
+      <div style={{
+        backgroundColor: '#ffffff',
+        borderRadius: '24px',
+        width: '100%',
+        maxWidth: '380px',
+        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+        position: 'relative',
+        animation: 'scaleInModal 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+        color: '#1e293b',
+        fontFamily: "'Inter', sans-serif",
+        textAlign: 'center',
+        padding: '36px'
+      }}>
+        {/* Close Button */}
+        <button 
+          onClick={onClose}
+          style={{
+            position: 'absolute',
+            top: '20px',
+            right: '20px',
+            background: '#f1f5f9',
+            border: 'none',
+            width: '36px',
+            height: '36px',
+            borderRadius: '50%',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#64748b',
+            transition: 'all 0.2s',
+            zIndex: 10
+          }}
+          onMouseEnter={e => {
+            e.currentTarget.style.background = '#e2e8f0';
+            e.currentTarget.style.color = '#334155';
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.background = '#f1f5f9';
+            e.currentTarget.style.color = '#64748b';
+          }}
+        >
+          <i className="fas fa-times" style={{ fontSize: '16px' }}></i>
+        </button>
+
+        <h2 style={{ fontSize: '22px', fontWeight: 800, marginBottom: '8px', color: '#0f172a', letterSpacing: '-0.5px' }}>
+          My Event QR Code
+        </h2>
+        <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '24px' }}>
+          Present this QR code at the registration desk for check-in.
+        </p>
+
+        {/* Dummy QR Code SVG */}
+        <div style={{
+          backgroundColor: '#f8fafc',
+          padding: '24px',
+          borderRadius: '20px',
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          border: '1.5px solid #e2e8f0',
+          marginBottom: '24px'
+        }}>
+          <svg width="200" height="200" viewBox="0 0 29 29" style={{ shapeRendering: 'crispEdges' }}>
+            <rect width="29" height="29" fill="#f8fafc" />
+            <rect x="0" y="0" width="7" height="7" fill="#0f172a" />
+            <rect x="1" y="1" width="5" height="5" fill="#f8fafc" />
+            <rect x="2" y="2" width="3" height="3" fill="#0f172a" />
+            <rect x="22" y="0" width="7" height="7" fill="#0f172a" />
+            <rect x="23" y="1" width="5" height="5" fill="#f8fafc" />
+            <rect x="24" y="2" width="3" height="3" fill="#0f172a" />
+            <rect x="0" y="22" width="7" height="7" fill="#0f172a" />
+            <rect x="1" y="23" width="5" height="5" fill="#f8fafc" />
+            <rect x="2" y="24" width="3" height="3" fill="#0f172a" />
+            <rect x="8" y="2" width="2" height="1" fill="#0f172a" />
+            <rect x="11" y="0" width="1" height="2" fill="#0f172a" />
+            <rect x="14" y="1" width="3" height="1" fill="#0f172a" />
+            <rect x="19" y="3" width="2" height="2" fill="#0f172a" />
+            <rect x="9" y="5" width="4" height="1" fill="#0f172a" />
+            <rect x="15" y="4" width="1" height="3" fill="#0f172a" />
+            <rect x="2" y="9" width="3" height="1" fill="#0f172a" />
+            <rect x="6" y="8" width="1" height="4" fill="#0f172a" />
+            <rect x="9" y="10" width="2" height="2" fill="#0f172a" />
+            <rect x="13" y="8" width="3" height="1" fill="#0f172a" />
+            <rect x="18" y="9" width="4" height="2" fill="#0f172a" />
+            <rect x="24" y="8" width="2" height="3" fill="#0f172a" />
+            <rect x="27" y="10" width="1" height="2" fill="#0f172a" />
+            <rect x="0" y="13" width="2" height="2" fill="#0f172a" />
+            <rect x="4" y="15" width="3" height="2" fill="#0f172a" />
+            <rect x="9" y="14" width="1" height="4" fill="#0f172a" />
+            <rect x="12" y="16" width="4" height="1" fill="#0f172a" />
+            <rect x="17" y="13" width="2" height="3" fill="#0f172a" />
+            <rect x="21" y="15" width="3" height="1" fill="#0f172a" />
+            <rect x="26" y="14" width="2" height="2" fill="#0f172a" />
+            <rect x="1" y="19" width="3" height="1" fill="#0f172a" />
+            <rect x="6" y="18" width="2" height="3" fill="#0f172a" />
+            <rect x="10" y="20" width="1" height="2" fill="#0f172a" />
+            <rect x="13" y="21" width="3" height="1" fill="#0f172a" />
+            <rect x="19" y="19" width="2" height="3" fill="#0f172a" />
+            <rect x="23" y="20" width="4" height="2" fill="#0f172a" />
+            <rect x="9" y="24" width="2" height="1" fill="#0f172a" />
+            <rect x="14" y="25" width="3" height="3" fill="#0f172a" />
+            <rect x="18" y="24" width="1" height="2" fill="#0f172a" />
+            <rect x="20" y="27" width="4" height="1" fill="#0f172a" />
+          </svg>
+        </div>
+
+        <button
+          onClick={onClose}
+          style={{
+            width: '100%',
+            padding: '14px',
+            borderRadius: '12px',
+            backgroundColor: '#0f172a',
+            color: '#ffffff',
+            border: 'none',
+            fontWeight: 700,
+            fontSize: '15px',
+            cursor: 'pointer',
+            transition: 'all 0.2s'
+          }}
+          onMouseEnter={e => e.currentTarget.style.backgroundColor = '#1e293b'}
+          onMouseLeave={e => e.currentTarget.style.backgroundColor = '#0f172a'}
+        >
+          Close QR Code
+        </button>
+      </div>
+
+      <style jsx>{`
+        @keyframes fadeInModal {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes scaleInModal {
+          from { transform: scale(0.95); opacity: 0; }
+          to { transform: scale(1); opacity: 1; }
+        }
+      `}</style>
+    </div>
+  );
+};
+
+// ─── Sign In Modal Component ──────────────────────────────────────────────────
+const SignInModal = ({ colors, onClose, onSwitchToRegister, onSignInSuccess }: { colors: any; onClose: () => void; onSwitchToRegister: () => void; onSignInSuccess: (email: string) => void }) => {
+  const [email, setEmail] = useState('john@example.com');
+  const [password, setPassword] = useState('password123');
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitted(true);
+    onSignInSuccess(email);
+  };
+
+  const handleGoogleSignIn = () => {
+    setSubmitted(true);
+    onSignInSuccess('google.user@gmail.com');
+  };
+
+  return (
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(15, 23, 42, 0.75)',
+      backdropFilter: 'blur(8px)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 99999,
+      padding: '20px',
+      animation: 'fadeInModal 0.25s ease-out'
+    }}>
+      <div style={{
+        backgroundColor: '#ffffff',
+        borderRadius: '24px',
+        width: '100%',
+        maxWidth: '440px',
+        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+        position: 'relative',
+        animation: 'scaleInModal 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+        color: '#1e293b',
+        fontFamily: "'Inter', sans-serif"
+      }}>
+        {/* Close Button */}
+        <button 
+          onClick={onClose}
+          style={{
+            position: 'absolute',
+            top: '20px',
+            right: '20px',
+            background: '#f1f5f9',
+            border: 'none',
+            width: '36px',
+            height: '36px',
+            borderRadius: '50%',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#64748b',
+            transition: 'all 0.2s',
+            zIndex: 10
+          }}
+          onMouseEnter={e => {
+            e.currentTarget.style.background = '#e2e8f0';
+            e.currentTarget.style.color = '#334155';
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.background = '#f1f5f9';
+            e.currentTarget.style.color = '#64748b';
+          }}
+        >
+          <i className="fas fa-times" style={{ fontSize: '16px' }}></i>
+        </button>
+
+        {!submitted ? (
+          <div style={{ padding: '36px' }}>
+            <h2 style={{ fontSize: '24px', fontWeight: 800, marginBottom: '8px', color: '#0f172a', letterSpacing: '-0.5px' }}>
+              Welcome Back
+            </h2>
+            <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '28px' }}>
+              Sign in to manage your event bookings and profile.
+            </p>
+
+            {/* Google Sign In Option */}
+            <button
+              type="button"
+              onClick={handleGoogleSignIn}
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                borderRadius: '12px',
+                border: '1.5px solid #e2e8f0',
+                backgroundColor: '#ffffff',
+                color: '#334155',
+                fontWeight: 600,
+                fontSize: '15px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '12px',
+                transition: 'all 0.2s',
+                marginBottom: '20px'
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.backgroundColor = '#f8fafc';
+                e.currentTarget.style.borderColor = '#cbd5e1';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.backgroundColor = '#ffffff';
+                e.currentTarget.style.borderColor = '#e2e8f0';
+              }}
+            >
+              <i className="fab fa-google" style={{ color: '#ea4335', fontSize: '18px' }}></i>
+              Sign in with Google
+            </button>
+
+            {/* Divider */}
+            <div style={{ display: 'flex', alignItems: 'center', margin: '20px 0', color: '#cbd5e1' }}>
+              <div style={{ flex: 1, height: '1px', backgroundColor: '#e2e8f0' }}></div>
+              <span style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600, padding: '0 12px', color: '#94a3b8' }}>or sign in with email</span>
+              <div style={{ flex: 1, height: '1px', backgroundColor: '#e2e8f0' }}></div>
+            </div>
+
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              {/* Email address */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '13px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#475569' }}>
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  required
+                  placeholder="e.g. john@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  style={{
+                    padding: '12px 16px',
+                    borderRadius: '12px',
+                    border: '1.5px solid #cbd5e1',
+                    fontSize: '15px',
+                    outline: 'none',
+                    transition: 'all 0.2s',
+                    width: '100%',
+                    color: '#0f172a',
+                    backgroundColor: '#ffffff'
+                  }}
+                />
+              </div>
+
+              {/* Password */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '13px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#475569' }}>
+                  Password
+                </label>
+                <input
+                  type="password"
+                  required
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  style={{
+                    padding: '12px 16px',
+                    borderRadius: '12px',
+                    border: '1.5px solid #cbd5e1',
+                    fontSize: '15px',
+                    outline: 'none',
+                    transition: 'all 0.2s',
+                    width: '100%',
+                    color: '#0f172a',
+                    backgroundColor: '#ffffff'
+                  }}
+                />
+              </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                style={{
+                  width: '100%',
+                  padding: '14px',
+                  borderRadius: '12px',
+                  backgroundColor: colors.primary || '#3b82f6',
+                  color: '#ffffff',
+                  border: 'none',
+                  fontWeight: 700,
+                  fontSize: '15px',
+                  cursor: 'pointer',
+                  transition: 'all 0.25s',
+                  marginTop: '10px',
+                  boxShadow: `0 8px 16px -4px ${colors.primary || '#3b82f6'}40`
+                }}
+              >
+                Sign In
+              </button>
+            </form>
+
+            {/* Footer switcher */}
+            <div style={{ textAlign: 'center', marginTop: '28px', fontSize: '14px', color: '#64748b' }}>
+              Don't have an account?{' '}
+              <button
+                onClick={() => {
+                  onClose();
+                  onSwitchToRegister();
+                }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: colors.primary || '#3b82f6',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  padding: 0,
+                  fontFamily: 'inherit',
+                  textDecoration: 'underline'
+                }}
+              >
+                Register
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div style={{ padding: '48px 36px', textAlign: 'center' }}>
+            <div style={{
+              width: '72px',
+              height: '72px',
+              borderRadius: '50%',
+              backgroundColor: '#dcfce7',
+              color: '#22c55e',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 24px',
+              fontSize: '32px'
+            }}>
+              <i className="fas fa-check"></i>
+            </div>
+            <h2 style={{ fontSize: '24px', fontWeight: 800, marginBottom: '12px', color: '#0f172a' }}>
+              Welcome Back!
+            </h2>
+            <p style={{ fontSize: '15px', color: '#64748b', lineHeight: '1.6', marginBottom: '28px' }}>
+              You have successfully signed in as <strong style={{ color: '#1e293b' }}>{email}</strong>.
+            </p>
+            <button
+              onClick={onClose}
+              style={{
+                padding: '12px 32px',
+                borderRadius: '12px',
+                backgroundColor: '#0f172a',
+                color: '#ffffff',
+                border: 'none',
+                fontWeight: 600,
+                fontSize: '15px',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }}
+            >
+              Get Started
+            </button>
+          </div>
+        )}
+      </div>
+
+      <style jsx>{`
+        @keyframes fadeInModal {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes scaleInModal {
+          from { transform: scale(0.95); opacity: 0; }
+          to { transform: scale(1); opacity: 1; }
+        }
+      `}</style>
+    </div>
+  );
+};
+
+// ─── Register Modal Component ──────────────────────────────────────────────────
+const RegisterModal = ({ colors, onClose }: { colors: any; onClose: () => void }) => {
+  const [ticketType, setTicketType] = useState<'premium' | 'silver' | 'student'>('silver');
+  const [fullName, setFullName] = useState('John Doe');
+  const [email, setEmail] = useState('johndoe@example.com');
+  const [phone, setPhone] = useState('+91 98765 43210');
+  const [submitted, setSubmitted] = useState(false);
+
+  const ticketOptions = [
+    { id: 'premium', label: 'Premium Pass', price: 2500, desc: 'Access top sessions' },
+    { id: 'silver', label: 'Silver', price: 500, desc: 'Meet and Greet' },
+    { id: 'student', label: 'Students', price: 0, desc: 'ID Mandatory' },
+  ];
+
+  const selectedTicket = ticketOptions.find(opt => opt.id === ticketType) || ticketOptions[1];
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitted(true);
+  };
+
+  return (
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(15, 23, 42, 0.75)',
+      backdropFilter: 'blur(8px)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 99999,
+      padding: '20px',
+      animation: 'fadeInModal 0.25s ease-out'
+    }}>
+      <div style={{
+        backgroundColor: '#ffffff',
+        borderRadius: '24px',
+        width: '100%',
+        maxWidth: '500px',
+        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+        maxHeight: '90vh',
+        overflowY: 'auto',
+        position: 'relative',
+        animation: 'scaleInModal 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+        color: '#1e293b',
+        fontFamily: "'Inter', sans-serif"
+      }}>
+        {/* Close Button */}
+        <button 
+          onClick={onClose}
+          style={{
+            position: 'absolute',
+            top: '20px',
+            right: '20px',
+            background: '#f1f5f9',
+            border: 'none',
+            width: '36px',
+            height: '36px',
+            borderRadius: '50%',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#64748b',
+            transition: 'all 0.2s',
+            zIndex: 10
+          }}
+          onMouseEnter={e => {
+            e.currentTarget.style.background = '#e2e8f0';
+            e.currentTarget.style.color = '#334155';
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.background = '#f1f5f9';
+            e.currentTarget.style.color = '#64748b';
+          }}
+        >
+          <i className="fas fa-times" style={{ fontSize: '16px' }}></i>
+        </button>
+
+        {!submitted ? (
+          <form onSubmit={handleSubmit} style={{ padding: '32px' }}>
+            <h2 style={{ fontSize: '24px', fontWeight: 800, marginBottom: '8px', color: '#0f172a', letterSpacing: '-0.5px' }}>
+              Register for Event
+            </h2>
+            <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '24px' }}>
+              Secure your spot today. Choose your ticket type and fill in your details.
+            </p>
+
+            {/* Ticket Options */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' }}>
+              <label style={{ fontSize: '13px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#475569' }}>
+                Select Ticket Type
+              </label>
+              {ticketOptions.map((opt) => {
+                const isSelected = ticketType === opt.id;
+                return (
+                  <div
+                    key={opt.id}
+                    onClick={() => setTicketType(opt.id as any)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      padding: '16px',
+                      borderRadius: '16px',
+                      border: isSelected ? '2px solid #3b82f6' : '1.5px solid #e2e8f0',
+                      backgroundColor: isSelected ? '#eff6ff' : '#ffffff',
+                      cursor: 'pointer',
+                      transition: 'all 0.25s ease',
+                      position: 'relative',
+                      boxShadow: isSelected ? '0 4px 12px rgba(59, 130, 246, 0.08)' : 'none'
+                    }}
+                    onMouseEnter={e => {
+                      if (!isSelected) {
+                        e.currentTarget.style.borderColor = '#cbd5e1';
+                        e.currentTarget.style.backgroundColor = '#f8fafc';
+                      }
+                    }}
+                    onMouseLeave={e => {
+                      if (!isSelected) {
+                        e.currentTarget.style.borderColor = '#e2e8f0';
+                        e.currentTarget.style.backgroundColor = '#ffffff';
+                      }
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      name="ticketType"
+                      checked={isSelected}
+                      onChange={() => setTicketType(opt.id as any)}
+                      style={{
+                        marginRight: '16px',
+                        width: '20px',
+                        height: '20px',
+                        accentColor: '#3b82f6',
+                        cursor: 'pointer'
+                      }}
+                    />
+                    <div style={{ flexGrow: 1 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                        <span style={{ fontWeight: 700, fontSize: '15px', color: isSelected ? '#1d4ed8' : '#1e293b' }}>
+                          {opt.label}
+                        </span>
+                        <span style={{ fontWeight: 800, fontSize: '15px', color: isSelected ? '#1d4ed8' : '#0f172a' }}>
+                          {opt.price === 0 ? 'Free' : `₹${opt.price}`}
+                        </span>
+                      </div>
+                      <p style={{ fontSize: '13px', color: isSelected ? '#1e40af' : '#64748b', margin: '4px 0 0 0', opacity: 0.85 }}>
+                        {opt.desc}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Dynamic Price Display */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              backgroundColor: '#f8fafc',
+              padding: '16px 20px',
+              borderRadius: '16px',
+              marginBottom: '24px',
+              borderLeft: `4px solid ${colors.primary || '#3b82f6'}`
+            }}>
+              <span style={{ fontSize: '14px', fontWeight: 600, color: '#64748b' }}>Total Ticket Price:</span>
+              <span style={{ fontSize: '20px', fontWeight: 800, color: '#0f172a' }}>
+                {selectedTicket.price === 0 ? 'Free' : `${selectedTicket.price} INR`}
+              </span>
+            </div>
+
+            {/* User Form Fields */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '32px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '13px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#475569' }}>
+                  Full Name <span style={{ color: '#ef4444' }}>*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. John Doe"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  style={{
+                    padding: '12px 16px',
+                    borderRadius: '12px',
+                    border: '1.5px solid #cbd5e1',
+                    fontSize: '15px',
+                    outline: 'none',
+                    transition: 'all 0.2s',
+                    width: '100%',
+                    color: '#0f172a',
+                    backgroundColor: '#ffffff'
+                  }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '13px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#475569' }}>
+                  Email Address <span style={{ color: '#ef4444' }}>*</span>
+                </label>
+                <input
+                  type="email"
+                  required
+                  placeholder="e.g. john@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  style={{
+                    padding: '12px 16px',
+                    borderRadius: '12px',
+                    border: '1.5px solid #cbd5e1',
+                    fontSize: '15px',
+                    outline: 'none',
+                    transition: 'all 0.2s',
+                    width: '100%',
+                    color: '#0f172a',
+                    backgroundColor: '#ffffff'
+                  }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '13px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#475569' }}>
+                  Phone Number <span style={{ color: '#ef4444' }}>*</span>
+                </label>
+                <input
+                  type="tel"
+                  required
+                  placeholder="e.g. +91 98765 43210"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  style={{
+                    padding: '12px 16px',
+                    borderRadius: '12px',
+                    border: '1.5px solid #cbd5e1',
+                    fontSize: '15px',
+                    outline: 'none',
+                    transition: 'all 0.2s',
+                    width: '100%',
+                    color: '#0f172a',
+                    backgroundColor: '#ffffff'
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Actions */}
+            <button
+              type="submit"
+              style={{
+                width: '100%',
+                padding: '16px',
+                borderRadius: '12px',
+                backgroundColor: colors.primary || '#3b82f6',
+                color: '#ffffff',
+                border: 'none',
+                fontWeight: 700,
+                fontSize: '16px',
+                cursor: 'pointer',
+                transition: 'all 0.25s',
+                boxShadow: `0 10px 20px -5px ${colors.primary || '#3b82f6'}50`
+              }}
+            >
+              Submit Registration
+            </button>
+          </form>
+        ) : (
+          <div style={{ padding: '48px 32px', textAlign: 'center' }}>
+            <div style={{
+              width: '80px',
+              height: '80px',
+              borderRadius: '50%',
+              backgroundColor: '#dcfce7',
+              color: '#22c55e',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 24px',
+              fontSize: '36px'
+            }}>
+              <i className="fas fa-check"></i>
+            </div>
+            <h2 style={{ fontSize: '24px', fontWeight: 800, marginBottom: '12px', color: '#0f172a' }}>
+              Registration Successful!
+            </h2>
+            <p style={{ fontSize: '15px', color: '#64748b', lineHeight: '1.6', marginBottom: '32px' }}>
+              Thank you, <strong style={{ color: '#1e293b' }}>{fullName}</strong>. Your ticket selection for <strong style={{ color: colors.primary || '#3b82f6' }}>{selectedTicket.label}</strong> ({selectedTicket.price === 0 ? 'Free' : `${selectedTicket.price} INR`}) has been reserved.
+            </p>
+            <button
+              onClick={onClose}
+              style={{
+                padding: '12px 32px',
+                borderRadius: '12px',
+                backgroundColor: '#0f172a',
+                color: '#ffffff',
+                border: 'none',
+                fontWeight: 600,
+                fontSize: '15px',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }}
+            >
+              Close
+            </button>
+          </div>
+        )}
+      </div>
+
+      <style jsx>{`
+        @keyframes fadeInModal {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes scaleInModal {
+          from { transform: scale(0.95); opacity: 0; }
+          to { transform: scale(1); opacity: 1; }
+        }
+      `}</style>
+    </div>
+  );
+};
+
+// ─── Visitors Section Component ──────────────────────────────────────────────
+const VisitorsSection = ({ colors }: { colors: any }) => {
+  const router = useRouter();
+  const [activeSubTab, setActiveSubTab] = useState<'agents' | 'companies'>('agents');
+
+  return (
+    <section style={{
+      background: '#f8fafc',
+      padding: '80px 0 120px',
+      minHeight: '80vh',
+      fontFamily: "'Inter', sans-serif"
+    }}>
+      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 20px' }}>
+        
+        {/* Header */}
+        <div style={{ textAlign: 'center', marginBottom: '60px' }}>
+          <span style={{
+            fontSize: '13px',
+            fontWeight: 800,
+            textTransform: 'uppercase',
+            letterSpacing: '2px',
+            color: colors.primary,
+            display: 'inline-block',
+            marginBottom: '12px'
+          }}>
+            Event Network
+          </span>
+          <h1 style={{
+            fontSize: '36px',
+            fontWeight: 800,
+            color: '#0f172a',
+            letterSpacing: '-1px',
+            marginBottom: '16px'
+          }}>
+            Attendees & Exhibitors
+          </h1>
+          <p style={{
+            fontSize: '16px',
+            color: '#64748b',
+            maxWidth: '600px',
+            margin: '0 auto'
+          }}>
+            Connect with certified travel professionals and industry leaders participating in the event.
+          </p>
+        </div>
+
+        {/* Sub-tab Selector */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          gap: '12px',
+          marginBottom: '48px'
+        }}>
+          <button
+            onClick={() => setActiveSubTab('agents')}
+            style={{
+              padding: '12px 28px',
+              borderRadius: '9999px',
+              border: 'none',
+              fontWeight: 700,
+              fontSize: '15px',
+              cursor: 'pointer',
+              transition: 'all 0.3s',
+              backgroundColor: activeSubTab === 'agents' ? colors.primary : '#ffffff',
+              color: activeSubTab === 'agents' ? '#ffffff' : '#475569',
+              boxShadow: activeSubTab === 'agents' ? `0 10px 20px -5px ${colors.primary}50` : '0 4px 6px -1px rgba(0,0,0,0.05)'
+            }}
+          >
+            <i className="fas fa-user-tie" style={{ marginRight: '8px' }}></i>
+            Travel Agents ({mockAgents.length})
+          </button>
+          <button
+            onClick={() => setActiveSubTab('companies')}
+            style={{
+              padding: '12px 28px',
+              borderRadius: '9999px',
+              border: 'none',
+              fontWeight: 700,
+              fontSize: '15px',
+              cursor: 'pointer',
+              transition: 'all 0.3s',
+              backgroundColor: activeSubTab === 'companies' ? colors.primary : '#ffffff',
+              color: activeSubTab === 'companies' ? '#ffffff' : '#475569',
+              boxShadow: activeSubTab === 'companies' ? `0 10px 20px -5px ${colors.primary}50` : '0 4px 6px -1px rgba(0,0,0,0.05)'
+            }}
+          >
+            <i className="fas fa-building" style={{ marginRight: '8px' }}></i>
+            Exhibitor Companies ({mockCompanies.length})
+          </button>
+        </div>
+
+        {/* Content Lists */}
+        {activeSubTab === 'agents' ? (
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+            gap: '30px'
+          }}>
+            {mockAgents.map((agent) => (
+              <div
+                key={agent.userId}
+                onClick={() => {
+                  const currentPath = typeof window !== 'undefined' ? (window.location.pathname + window.location.search) : '';
+                  router.push(`/agents?id=${agent.userId}&from=${encodeURIComponent(currentPath)}`);
+                }}
+                style={{
+                  backgroundColor: '#ffffff',
+                  borderRadius: '24px',
+                  border: '1.5px solid #e2e8f0',
+                  padding: '28px',
+                  transition: 'all 0.3s ease',
+                  position: 'relative',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  height: '100%',
+                  cursor: 'pointer'
+                }}
+                className="visitor-card"
+              >
+                {/* Agent Header */}
+                <div style={{ display: 'flex', gap: '16px', alignItems: 'center', marginBottom: '20px' }}>
+                  <img
+                    src={agent.profileImage}
+                    alt={agent.fullName}
+                    style={{
+                      width: '64px',
+                      height: '64px',
+                      borderRadius: '50%',
+                      objectFit: 'cover',
+                      border: `2px solid ${colors.primary}20`
+                    }}
+                  />
+                  <div>
+                    <h3 style={{
+                      fontSize: '18px',
+                      fontWeight: 700,
+                      color: '#0f172a',
+                      margin: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}>
+                      {agent.fullName}
+                      {agent.isVerified && (
+                        <i className="fas fa-check-circle" style={{ color: '#3b82f6', fontSize: '14px' }}></i>
+                      )}
+                    </h3>
+                    <span style={{ fontSize: '13px', color: colors.primary, fontWeight: 600 }}>
+                      {agent.title}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Details */}
+                <div style={{ fontSize: '14px', color: '#475569', marginBottom: '20px', flexGrow: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                    <i className="fas fa-briefcase" style={{ color: '#94a3b8', width: '16px' }}></i>
+                    <strong>{agent.agencyName}</strong>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                    <i className="fas fa-map-marker-alt" style={{ color: '#94a3b8', width: '16px' }}></i>
+                    <span>{agent.location}</span>
+                  </div>
+                </div>
+
+                {/* Tags */}
+                <div style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: '6px',
+                  marginBottom: '24px'
+                }}>
+                  {agent.tags.map((tag, i) => (
+                    <span
+                      key={i}
+                      style={{
+                        fontSize: '11px',
+                        fontWeight: 600,
+                        backgroundColor: '#f1f5f9',
+                        color: '#475569',
+                        padding: '4px 10px',
+                        borderRadius: '9999px'
+                      }}
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Social/Contact Footer */}
+                <div 
+                  onClick={e => e.stopPropagation()}
+                  style={{
+                    display: 'flex',
+                    gap: '12px',
+                    borderTop: '1px solid #f1f5f9',
+                    paddingTop: '20px',
+                    justifyContent: 'flex-start'
+                  }}
+                >
+                  {agent.socialLinks?.website && (
+                    <a href={agent.socialLinks.website} target="_blank" rel="noopener noreferrer" style={{
+                      width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#f8fafc',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b', transition: 'all 0.2s'
+                    }}>
+                      <i className="fas fa-globe"></i>
+                    </a>
+                  )}
+                  {agent.socialLinks?.linkedin && (
+                    <a href={agent.socialLinks.linkedin} target="_blank" rel="noopener noreferrer" style={{
+                      width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#f8fafc',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b', transition: 'all 0.2s'
+                    }}>
+                      <i className="fab fa-linkedin-in"></i>
+                    </a>
+                  )}
+                  {agent.whatsappNumber && (
+                    <a href={`https://wa.me/${agent.whatsappNumber.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" style={{
+                      width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#f8fafc',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#22c55e', transition: 'all 0.2s'
+                    }}>
+                      <i className="fab fa-whatsapp"></i>
+                    </a>
+                  )}
+                  {agent.email && (
+                    <a href={`mailto:${agent.email}`} style={{
+                      width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#f8fafc',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ea4335', transition: 'all 0.2s'
+                    }}>
+                      <i className="far fa-envelope"></i>
+                    </a>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
+            gap: '30px'
+          }}>
+            {mockCompanies.map((company, idx) => (
+              <div
+                key={idx}
+                onClick={() => {
+                  const currentPath = typeof window !== 'undefined' ? (window.location.pathname + window.location.search) : '';
+                  router.push(`/companies?id=${company.companyName}&from=${encodeURIComponent(currentPath)}`);
+                }}
+                style={{
+                  backgroundColor: '#ffffff',
+                  borderRadius: '24px',
+                  border: '1.5px solid #e2e8f0',
+                  padding: '28px',
+                  transition: 'all 0.3s ease',
+                  position: 'relative',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  height: '100%',
+                  cursor: 'pointer'
+                }}
+                className="visitor-card"
+              >
+                {/* Company Header */}
+                <div style={{ display: 'flex', gap: '16px', alignItems: 'center', marginBottom: '20px' }}>
+                  <img
+                    src={company.logo}
+                    alt={company.companyName}
+                    style={{
+                      width: '64px',
+                      height: '64px',
+                      borderRadius: '16px',
+                      objectFit: 'cover',
+                      border: `1.5px solid #e2e8f0`
+                    }}
+                  />
+                  <div>
+                    <h3 style={{
+                      fontSize: '18px',
+                      fontWeight: 800,
+                      color: '#0f172a',
+                      margin: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}>
+                      {company.companyName}
+                      {company.isVerified && (
+                        <i className="fas fa-check-circle" style={{ color: '#3b82f6', fontSize: '14px' }}></i>
+                      )}
+                    </h3>
+                    <span style={{ fontSize: '13px', color: '#64748b' }}>
+                      {company.industry}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Tagline & Desc */}
+                <span style={{ fontStyle: 'italic', color: colors.primary, fontSize: '13px', fontWeight: 600, marginBottom: '12px', display: 'block' }}>
+                  "{company.tagline}"
+                </span>
+                <p style={{
+                  fontSize: '14px',
+                  color: '#475569',
+                  lineHeight: '1.5',
+                  marginBottom: '20px',
+                  flexGrow: 1
+                }}>
+                  {company.description}
+                </p>
+
+                {/* Meta details */}
+                <div style={{ fontSize: '13px', color: '#64748b', marginBottom: '20px' }}>
+                  <div style={{ display: 'flex', gap: '20px' }}>
+                    <span><i className="fas fa-users" style={{ marginRight: '6px' }}></i>{company.teamSize}</span>
+                    <span><i className="fas fa-map-marker-alt" style={{ marginRight: '6px' }}></i>{company.location}</span>
+                  </div>
+                </div>
+
+                {/* Tags */}
+                <div style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: '6px',
+                  marginBottom: '24px'
+                }}>
+                  {company.tags.map((tag, i) => (
+                    <span
+                      key={i}
+                      style={{
+                        fontSize: '11px',
+                        fontWeight: 600,
+                        backgroundColor: '#f1f5f9',
+                        color: '#475569',
+                        padding: '4px 10px',
+                        borderRadius: '9999px'
+                      }}
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Footer links */}
+                <div 
+                  onClick={e => e.stopPropagation()}
+                  style={{
+                    display: 'flex',
+                    gap: '12px',
+                    borderTop: '1px solid #f1f5f9',
+                    paddingTop: '20px',
+                    justifyContent: 'flex-start'
+                  }}
+                >
+                  {company.website && (
+                    <a href={company.website} target="_blank" rel="noopener noreferrer" style={{
+                      width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#f8fafc',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b', transition: 'all 0.2s'
+                    }}>
+                      <i className="fas fa-globe"></i>
+                    </a>
+                  )}
+                  {company.socialLinks?.linkedin && (
+                    <a href={company.socialLinks.linkedin} target="_blank" rel="noopener noreferrer" style={{
+                      width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#f8fafc',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b', transition: 'all 0.2s'
+                    }}>
+                      <i className="fab fa-linkedin-in"></i>
+                    </a>
+                  )}
+                  {company.email && (
+                    <a href={`mailto:${company.email}`} style={{
+                      width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#f8fafc',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ea4335', transition: 'all 0.2s'
+                    }}>
+                      <i className="far fa-envelope"></i>
+                    </a>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+      </div>
+      <style jsx>{`
+        .visitor-card:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+          border-color: ${colors.primary}40 !important;
+        }
+      `}</style>
+    </section>
+  );
+};
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function ThemeOne({ 
   data, 
@@ -1046,10 +2516,21 @@ export default function ThemeOne({
 }: ThemeOneProps) {
   const colors = getColors(themeConfig);
   const [settingsSection, setSettingsSection] = useState<{ id: string, type: string, data: any } | null>(null);
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const [showSignInModal, setShowSignInModal] = useState(false);
+  const [showQrModal, setShowQrModal] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showVisitorsPage, setShowVisitorsPage] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('tab') === 'visitors') {
+        setShowVisitorsPage(true);
+      }
+    }
   }, []);
 
   const renderThemeSection = (section: any, index: number) => {
@@ -1134,6 +2615,7 @@ export default function ThemeOne({
           isMounted={isMounted}
           isFirst={isFirst}
           onUpdate={(newData: any) => onUpdateSection?.(section.id, newData)}
+          onRegisterClick={() => setShowRegisterModal(true)}
         />
       </ThemeSectionWrapper>
     );
@@ -1165,9 +2647,24 @@ export default function ThemeOne({
           const hero = data?.sections?.find((s: any) => s.type === 'HERO');
           if (hero) onUpdateSection?.(hero.id, { ...hero.data, logo: newLogo });
         }}
+        onSignInClick={() => setShowSignInModal(true)}
+        isLoggedIn={isLoggedIn}
+        onMyQrClick={() => setShowQrModal(true)}
+        onSignOutClick={() => setIsLoggedIn(false)}
+        showVisitorsPage={showVisitorsPage}
+        onVisitorsClick={() => {
+          setShowVisitorsPage(true);
+        }}
+        onProfileTabClick={() => {
+          setShowVisitorsPage(false);
+        }}
       />
       
-      {(data?.sections && data.sections.length > 0) ? (
+      {showVisitorsPage ? (
+        <VisitorsSection 
+          colors={colors} 
+        />
+      ) : (data?.sections && data.sections.length > 0) ? (
         data.sections.map((section: any, index: number) => renderThemeSection(section, index))
       ) : (
         <div style={{ padding: '100px', textAlign: 'center', color: '#64748b' }}>
@@ -1203,6 +2700,31 @@ export default function ThemeOne({
           }}
         />
       )}
+
+      {showRegisterModal && (
+        <RegisterModal 
+          colors={colors} 
+          onClose={() => setShowRegisterModal(false)} 
+        />
+      )}
+
+      {showSignInModal && (
+        <SignInModal 
+          colors={colors} 
+          onClose={() => setShowSignInModal(false)} 
+          onSwitchToRegister={() => setShowRegisterModal(true)}
+          onSignInSuccess={() => setIsLoggedIn(true)}
+        />
+      )}
+
+      {showQrModal && (
+        <QrModal 
+          colors={colors} 
+          onClose={() => setShowQrModal(false)} 
+        />
+      )}
+
+
 
       {/* FontAwesome for icons */}
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
