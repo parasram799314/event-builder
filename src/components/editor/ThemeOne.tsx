@@ -273,13 +273,31 @@ const triggerLogoUpload = () => {
     }}>
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 20px", display: "flex", alignItems: "center", justifyContent: "space-between", height: '100%', width: '100%' }}>
         <div className="nav-logo" style={{ display: 'flex', alignItems: 'center', whiteSpace: 'nowrap', position: 'relative', gap: '10px', zIndex: 1001 }}>
+          {!isReadOnly && (
+            <button
+              onClick={triggerLogoUpload}
+              style={{
+                background: '#f2545f',
+                color: '#fff',
+                border: 'none',
+                padding: '6px 12px',
+                borderRadius: '8px',
+                fontSize: '10px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+                letterSpacing: '0.5px'
+              }}
+            >
+              📁 LOGO
+            </button>
+          )}
           <div onClick={(e) => { 
             if (isReadOnly) { e.preventDefault(); scrollTo("home"); }
-            else triggerLogoUpload();
-          }} style={{ cursor: isReadOnly ? 'default' : 'pointer' }}>
+          }} style={{ cursor: 'default' }}>
            {logo ? (
               <div style={{ position: 'relative', display: 'inline-block' }}>
-                <img src={logo} alt="Logo" style={{ height: '35px', maxWidth: '100px', objectFit: 'contain', display: 'block' }} />
+<img src={logo} alt="Logo" style={{ height: '70px', maxWidth: '200px', objectFit: 'contain', display: 'block' }} />
                 {!isReadOnly && (
                   <div
                     style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', opacity: 0, transition: 'opacity 0.2s', cursor: 'pointer' }}
@@ -292,15 +310,15 @@ const triggerLogoUpload = () => {
               </div>
             ) : (
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div 
-                  style={{ color: primaryColor, fontWeight: 800, fontSize: "1.5rem", letterSpacing: '-1px', outline: 'none', display: 'flex', alignItems: 'center' }}
-                  contentEditable={!isReadOnly}
-                  suppressContentEditableWarning
-                  onClick={(e) => !isReadOnly && e.stopPropagation()}
-                >
-                  <span style={{ color: '#fff', marginRight: '4px' }}>Indian Small Scale </span>
-                  <span>Paints Association</span>
-                </div>
+               <div 
+  style={{ color: primaryColor, fontWeight: 800, fontSize: "clamp(11px, 3.2vw, 1.5rem)", letterSpacing: '-0.5px', outline: 'none', display: 'flex', alignItems: 'center', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '200px' }}
+  contentEditable={!isReadOnly}
+  suppressContentEditableWarning
+  onClick={(e) => !isReadOnly && e.stopPropagation()}
+>
+  <span style={{ color: '#fff', marginRight: '4px' }}>AsianPaints</span>
+  <span>Event</span>
+</div>
               </div>
             )}
           </div>
