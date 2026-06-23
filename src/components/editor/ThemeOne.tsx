@@ -220,8 +220,7 @@ export const Navbar = ({ primaryColor, isReadOnly, logo, profiles, onTabChange, 
     setMenuOpen(false);
   };
 
-  const triggerLogoUpload = () => {
-    if (isReadOnly) return;
+const triggerLogoUpload = () => {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
@@ -278,8 +277,19 @@ export const Navbar = ({ primaryColor, isReadOnly, logo, profiles, onTabChange, 
             if (isReadOnly) { e.preventDefault(); scrollTo("home"); }
             else triggerLogoUpload();
           }} style={{ cursor: isReadOnly ? 'default' : 'pointer' }}>
-            {logo ? (
-              <img src={logo} alt="Logo" style={{ height: '35px', maxWidth: '100px', objectFit: 'contain' }} />
+           {logo ? (
+              <div style={{ position: 'relative', display: 'inline-block' }}>
+                <img src={logo} alt="Logo" style={{ height: '35px', maxWidth: '100px', objectFit: 'contain', display: 'block' }} />
+                {!isReadOnly && (
+                  <div
+                    style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', opacity: 0, transition: 'opacity 0.2s', cursor: 'pointer' }}
+                    onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
+                    onMouseLeave={e => (e.currentTarget.style.opacity = '0')}
+                  >
+                    <span style={{ color: '#fff', fontSize: '9px', fontWeight: 700 }}>CHANGE</span>
+                  </div>
+                )}
+              </div>
             ) : (
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <div 
@@ -288,8 +298,8 @@ export const Navbar = ({ primaryColor, isReadOnly, logo, profiles, onTabChange, 
                   suppressContentEditableWarning
                   onClick={(e) => !isReadOnly && e.stopPropagation()}
                 >
-                  <span style={{ color: '#fff', marginRight: '4px' }}>AsianPaints</span>
-                  <span>Event</span>
+                  <span style={{ color: '#fff', marginRight: '4px' }}>Indian Small Scale </span>
+                  <span>Paints Association</span>
                 </div>
               </div>
             )}
