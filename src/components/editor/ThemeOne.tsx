@@ -873,7 +873,7 @@ const HomeHero = ({ colors, data, onUpdate, isReadOnly, isMounted, isFirst, onRe
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600, fontSize: '13px' }}>
                <i className="fas fa-map-marker-alt" style={{ color: colors.primary }}></i>
-               <span>{dt.venueText || 'Grand Convention Center, SF'}</span>
+               <span>{dt.venueText || 'Westin Hotel, Powai ,Mumbai'}</span>
             </div>
           </div>
 
