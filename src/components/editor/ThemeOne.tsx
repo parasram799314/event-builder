@@ -805,10 +805,12 @@ const HomeHero = ({ colors, data, onUpdate, isReadOnly, isMounted, isFirst, onRe
         )}
 
         <div style={contentStyle} className="home-hero-content">
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: isSplit ? `${colors.primary}0d` : 'rgba(255,255,255,0.06)', backdropFilter: 'blur(10px)', padding: '8px 20px', borderRadius: '9999px', marginBottom: '32px', border: isSplit ? `1.5px solid ${colors.primary}20` : '1px solid rgba(255,255,255,0.12)' }}>
-            <i className="fas fa-star" style={{ color: colors.primary, fontSize: '12px' }}></i>
-            <span style={{ fontSize: '13px', fontWeight: 800, letterSpacing: '2px', textTransform: 'uppercase', color: isSplit ? colors.primary : '#fff' }}>{slide.badge || 'Limited Seats Available'}</span>
-          </div>
+        {slide.badge !== '' && slide.badge !== null && slide.badge !== undefined && (
+  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: isSplit ? `${colors.primary}0d` : 'rgba(255,255,255,0.06)', backdropFilter: 'blur(10px)', padding: '8px 20px', borderRadius: '9999px', marginBottom: '32px', border: isSplit ? `1.5px solid ${colors.primary}20` : '1px solid rgba(255,255,255,0.12)' }}>
+    <i className="fas fa-star" style={{ color: colors.primary, fontSize: '12px' }}></i>
+    <span style={{ fontSize: '13px', fontWeight: 800, letterSpacing: '2px', textTransform: 'uppercase', color: isSplit ? colors.primary : '#fff' }}>{slide.badge || 'Limited Seats Available'}</span>
+  </div>
+)}
 
           <EditableText 
             tagName="h1" text={slide.title || 'Experience the Next Big Thing'} isReadOnly={isReadOnly}
@@ -1043,12 +1045,12 @@ const Speakers = ({ colors, data, onUpdate, isReadOnly, isFirst }: { colors: any
         <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: '25px' }}>
           {items.map((sp: any, i: number) => (
             <div key={i} className="speaker-card" style={{ background: colors.white, padding: '25px', borderRadius: '24px', boxShadow: '0 10px 30px rgba(0,0,0,0.06)', transition: 'all 0.4s ease', textAlign: 'center', width: '100%', maxWidth: '300px' }}>
-              <div style={{ overflow: 'hidden', borderRadius: '20px', height: '320px', marginBottom: '20px', position: 'relative' }}>
+<div style={{ overflow: 'hidden', borderRadius: '20px', height: '200px', marginBottom: '20px', position: 'relative' }}>
                 <EditableImage
                   src={sp.image || sp.img || 'https://via.placeholder.com/400x400'}
                   isReadOnly={isReadOnly}
                   onUpdate={(val: string) => updateSpeaker(i, 'image', val)}
-                  style={{ width: "100%", height: "100%", objectFit: 'cover', transition: 'transform 0.5s ease' }}
+                style={{ width: "100%", height: "100%", objectFit: 'cover', objectPosition: 'top', transition: 'transform 0.5s ease' }}
                   className="speaker-img"
                 />
               </div>
@@ -1057,19 +1059,73 @@ const Speakers = ({ colors, data, onUpdate, isReadOnly, isFirst }: { colors: any
                 onUpdate={(val: string) => updateSpeaker(i, 'name', val)}
                 style={{ fontSize: '22px', fontWeight: 800, marginBottom: '6px', color: colors.dark2 }}
               />
-              <div style={{ display: 'flex', justifyContent: 'center', gap: '5px', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '5px', flexWrap: 'wrap', marginBottom: '12px' }}>
                 <EditableText
                   tagName="span" text={sp.role} isReadOnly={isReadOnly}
                   onUpdate={(val: string) => updateSpeaker(i, 'role', val)}
                   style={{ color: colors.primary, fontSize: '14px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}
                 />
-
                 {sp.company && <span style={{ color: colors.textGrey, fontSize: '13px' }}>@</span>}
                 <EditableText 
                   tagName="span" text={sp.company || ''} isReadOnly={isReadOnly}
                   onUpdate={(val: string) => updateSpeaker(i, 'company', val)}
                   style={{ color: colors.textGrey, fontSize: '13px' }}
                 />
+              </div>
+
+              {/* ── Contact Details ── */}
+              <div style={{ marginBottom: '12px' }}>
+                {(sp.email || !isReadOnly) && (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginBottom: '4px' }}>
+                    <i className="fas fa-envelope" style={{ color: colors.primary, fontSize: '11px' }}></i>
+                    <EditableText
+                      tagName="span" text={sp.email || 'email@example.com'} isReadOnly={isReadOnly}
+                      onUpdate={(val: string) => updateSpeaker(i, 'email', val)}
+                      style={{ color: colors.textGrey, fontSize: '12.5px' }}
+                    />
+                  </div>
+                )}
+                {(sp.phone || !isReadOnly) && (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                    <i className="fas fa-phone" style={{ color: colors.primary, fontSize: '11px' }}></i>
+                    <EditableText
+                      tagName="span" text={sp.phone || '+91 00000 00000'} isReadOnly={isReadOnly}
+                      onUpdate={(val: string) => updateSpeaker(i, 'phone', val)}
+                      style={{ color: colors.textGrey, fontSize: '12.5px' }}
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* ── Social Media Icons ── */}
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', borderTop: '1px solid #f1f5f9', paddingTop: '14px', marginTop: '14px' }}>
+                {sp.linkedin && (
+                  <a href={sp.linkedin} target="_blank" rel="noopener noreferrer" style={{ width: '32px', height: '32px', borderRadius: '50%', background: `${colors.primary}10`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: colors.primary, fontSize: '13px' }}>
+                    <i className="fab fa-linkedin-in"></i>
+                  </a>
+                )}
+                {sp.twitter && (
+                  <a href={sp.twitter} target="_blank" rel="noopener noreferrer" style={{ width: '32px', height: '32px', borderRadius: '50%', background: `${colors.primary}10`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: colors.primary, fontSize: '13px' }}>
+                    <i className="fab fa-twitter"></i>
+                  </a>
+                )}
+                {sp.website && (
+                  <a href={sp.website} target="_blank" rel="noopener noreferrer" style={{ width: '32px', height: '32px', borderRadius: '50%', background: `${colors.primary}10`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: colors.primary, fontSize: '13px' }}>
+                    <i className="fas fa-globe"></i>
+                  </a>
+                )}
+                {!isReadOnly && (
+                  <button
+                    onClick={() => {
+                      const url = prompt('LinkedIn URL daalo:', sp.linkedin || '');
+                      if (url !== null) updateSpeaker(i, 'linkedin', url);
+                    }}
+                    style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#f1f5f9', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', fontSize: '11px', cursor: 'pointer' }}
+                    title="Edit social links"
+                  >
+                    <i className="fas fa-plus"></i>
+                  </button>
+                )}
               </div>
             </div>
           ))}
@@ -2667,7 +2723,12 @@ export default function ThemeOne({
       <Navbar 
         primaryColor={colors.primary} 
         isReadOnly={isReadOnly} 
-        logo={data?.sections?.find((s: any) => s.type === 'HERO')?.data?.logo} 
+        logo={
+  profiles?.find((p: any) => p.isDefault || p.id === 'home')
+    ?.sections?.find((s: any) => s.type === 'HERO')
+    ?.data?.logo
+  ?? data?.sections?.find((s: any) => s.type === 'HERO')?.data?.logo
+}
         profiles={profiles}
         onTabChange={onTabChange}
         sections={data?.sections}

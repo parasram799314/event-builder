@@ -38,7 +38,7 @@ const HeroSection: React.FC<HeroSectionProps> = (props) => {
       titleStyle: { color: '#0f172a', fontWeight: '800' },
       subtitleStyle: { color: '#475569' },
       layout: 'split-left',
-      imageWidth: 45,
+      imageWidth: 55,
       textAlignment: 'left'
     }
   ];
